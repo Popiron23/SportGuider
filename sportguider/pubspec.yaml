@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core: ^4.2.1
+  yandex_maps_mapkit_lite:
+    version: ^4.26.0-beta
 
 dev_dependencies:
   flutter_test:
@@ -18,3 +20,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
