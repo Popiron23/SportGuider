@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sportguider/presentation/app.dart';
+import 'package:yandex_maps_mapkit_lite/init.dart' as init;
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(const MainApp());
-}
+  await init.initMapkit(
+    apiKey: String.fromEnvironment('MAPKIT_API_KEY'),
+  ); 
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+  runApp(const SportGuiderApp());
 }
