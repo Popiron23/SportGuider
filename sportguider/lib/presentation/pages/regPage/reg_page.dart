@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:sportguider/presentation/pages/regPage/widgets/password_input_field.dart';
 import 'package:sportguider/presentation/pages/regPage/widgets/login_input_field.dart';
+import 'package:sportguider/presentation/pages/regPage/widgets/registration_button.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 @RoutePage()
@@ -26,7 +27,8 @@ class _RegPageState extends State<RegPage> {
             ),
             child: Column(
               children: [
-
+                
+                //Отступ между виджетом "Логин" и текстом "Регистрация"
                 SizedBox(height: 60),
 
                 //Виджет-логин
@@ -36,7 +38,8 @@ class _RegPageState extends State<RegPage> {
                   child: LoginInputField(),
                 ),
                 
-                SizedBox(height: 100),
+                //Отступ между виджетом "Пароль" и виджетом "Логин"
+                SizedBox(height: 70),
                 
                 //Виджет-пароль
                 Container(
@@ -44,11 +47,21 @@ class _RegPageState extends State<RegPage> {
                   height: 35,
                   child: PasswordInputField(),
                 ),
+
+                //Отступ между виджетом "Пароль" и виджетом "Зарегистрироваться"
+                SizedBox(height: 30),
+
+                //Виджет-зарегистрироваться
+                Container(
+                  width: 320,
+                  height: 35,
+                  child: RegistrationButton(),
+                ),
               ],
             ),
           ),
           
-          //Надпись "Регистрация"
+          //Текст "Регистрация"
           Positioned(
             top: 200,
             left: 0,
@@ -65,7 +78,7 @@ class _RegPageState extends State<RegPage> {
             ),
           ),
 
-          //Надпись "Логин"
+          //Текст "Логин"
           Positioned(
             top: 356,
             left: 0,
@@ -82,9 +95,9 @@ class _RegPageState extends State<RegPage> {
             ),
           ),
 
-          //Надпись "Пароль"
+          //Текст "Пароль"
           Positioned(
-            top: 490,
+            top: 460,
             left: 0,
             right: 0,
             child: Center(
