@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
             LocationEntity(id: 3, latitude: 55.89321, longitude: 37.62678),
           ],
         ),
-        RegRoute(),
+        CoachRoute(),
         FriendRoute(),
       ],
       bottomNavigationBuilder: (_, tabsRouter) {

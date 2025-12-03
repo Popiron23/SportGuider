@@ -11,7 +11,7 @@ class AppRouter extends RootStackRouter {
       initial: true,
       children: [
         AutoRoute(path: 'map', page: MapRoute.page),
-        AutoRoute(path: 'reg', page: RegRoute.page),
+        AutoRoute(path: 'reg', page: CoachRoute.page),
         AutoRoute(path: 'friend', page: FriendRoute.page),
       ],
     ),
