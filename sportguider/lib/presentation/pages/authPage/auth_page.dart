@@ -11,10 +11,10 @@ class AuthPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [UsernameStroke(), PasswordStroke()],
-        ),
+        child: Text('Пиструнчик'),
+        //mainAxisAlignment: MainAxisAlignment.center,
+
+        //children: [UsernameStroke(), PasswordStroke()],
       ),
     );
   }

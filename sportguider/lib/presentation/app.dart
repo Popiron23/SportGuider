@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sportguider/routes/router.dart';
+import 'package:sportguider/presentation/pages/authPage/auth_page.dart';
 
 class SportGuiderApp extends StatefulWidget {
   const SportGuiderApp({super.key});
@@ -13,6 +14,8 @@ class _SportGuiderAppState extends State<SportGuiderApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(routerConfig: _appRouter.config());
+    return MaterialApp(
+      home: AuthPage(),
+    ); //.router(routerConfig: _appRouter.config());
   }
 }
