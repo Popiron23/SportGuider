@@ -26,12 +26,11 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
+      color: Colors.white,
       child: Stack(
-        textDirection: TextDirection.ltr,
         children: [
-          ProfileButton(),
           YandexMap(onMapCreated: _onMapCreated),
+          ProfileButton(),
         ],
       ),
     );
