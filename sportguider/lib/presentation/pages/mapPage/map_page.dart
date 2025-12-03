@@ -30,8 +30,8 @@ class _MapPageState extends State<MapPage> {
       child: Stack(
         textDirection: TextDirection.ltr,
         children: [
-          ProfileButton(),
           YandexMap(onMapCreated: _onMapCreated),
+          Positioned(left: 10, top: 10, child: ProfileButton()),
         ],
       ),
     );
