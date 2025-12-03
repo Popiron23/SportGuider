@@ -2,14 +2,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
-class RegPage extends StatefulWidget {
-  const RegPage({super.key});
+class CoachPage extends StatefulWidget {
+  const CoachPage({super.key});
 
   @override
-  State<RegPage> createState() => _RegPageState();
+  State<CoachPage> createState() => _CoachPageState();
 }
 
-class _RegPageState extends State<RegPage> {
+class _CoachPageState extends State<CoachPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold();

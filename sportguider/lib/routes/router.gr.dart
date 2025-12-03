@@ -16,7 +16,8 @@ import 'package:sportguider/domain/entities/location_entity.dart' as _i7;
 import 'package:sportguider/presentation/pages/friendPage/friend_page.dart'
     as _i1;
 import 'package:sportguider/presentation/pages/mapPage/map_page.dart' as _i3;
-import 'package:sportguider/presentation/pages/regPage/reg_page.dart' as _i4;
+import 'package:sportguider/presentation/pages/coachPage/coach_page.dart'
+    as _i4;
 import 'package:sportguider/presentation/widgets/home_page.dart' as _i2;
 
 /// generated route for
@@ -105,17 +106,17 @@ class MapRouteArgs {
 }
 
 /// generated route for
-/// [_i4.RegPage]
-class RegRoute extends _i5.PageRouteInfo<void> {
-  const RegRoute({List<_i5.PageRouteInfo>? children})
-    : super(RegRoute.name, initialChildren: children);
+/// [_i4.CoachPage]
+class CoachRoute extends _i5.PageRouteInfo<void> {
+  const CoachRoute({List<_i5.PageRouteInfo>? children})
+    : super(CoachRoute.name, initialChildren: children);
 
-  static const String name = 'RegRoute';
+  static const String name = 'CoachRoute';
 
   static _i5.PageInfo page = _i5.PageInfo(
     name,
     builder: (data) {
-      return const _i4.RegPage();
+      return const _i4.CoachPage();
     },
   );
 }
