@@ -111,6 +111,16 @@ class _RegPageState extends State<RegPage> {
               ),
             ),
           ),
+
+          //Стрелочка-возвращение назад
+          Padding(
+            padding: EdgeInsets.all(10), // Отступ со всех сторон
+            child: Icon(
+              Icons.arrow_back,
+              size:50,
+              color: AppColors.activeColor,
+              ),
+          )
         ],
       ),
     );
