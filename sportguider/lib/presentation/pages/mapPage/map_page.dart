@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:sportguider/domain/entities/location_entity.dart';
-import 'package:sportguider/domain/entities/user_entity.dart';
 import 'package:yandex_maps_mapkit_lite/image.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
@@ -25,7 +24,16 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: YandexMap(onMapCreated: _onMapCreated));
+    return Container(
+      color: Colors.blue,
+      child: Stack(
+        textDirection: TextDirection.ltr,
+        children: [
+          ProfileButton(),
+          YandexMap(onMapCreated: _onMapCreated),
+        ],
+      ),
+    );
   }
 
   void _onMapCreated(MapWindow mapWindow) {
