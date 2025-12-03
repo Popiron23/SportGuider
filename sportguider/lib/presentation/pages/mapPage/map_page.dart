@@ -1,14 +1,15 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:sportguider/domain/entities/location_entity.dart';
-import 'package:yandex_maps_mapkit_lite/image.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
-import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/profile_button.dart';
+import 'package:yandex_maps_mapkit/image.dart';
+import 'package:yandex_maps_mapkit/mapkit.dart';
+import 'package:yandex_maps_mapkit/mapkit_factory.dart';
+import 'package:yandex_maps_mapkit/yandex_map.dart';
 
+@RoutePage()
 class MapPage extends StatefulWidget {
   final List<LocationEntity> locations;
-
   const MapPage({super.key, required this.locations});
 
   @override
