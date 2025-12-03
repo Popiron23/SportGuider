@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:sportguider/presentation/pages/regPage/widgets/password_input_field.dart';
 
 @RoutePage()
 class RegPage extends StatefulWidget {
@@ -10,8 +11,23 @@ class RegPage extends StatefulWidget {
 }
 
 class _RegPageState extends State<RegPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Padding(
+      padding: EdgeInsets.only(
+       left:60,
+       right:60,
+       top:100
+      ),
+      child: Center( // Центрируем по горизонтали
+        child: Container(
+          width: 320,
+          height: 35,
+          child: PasswordInputField(),
+        ),
+      ),
+    ),
+  );
+}
 }
