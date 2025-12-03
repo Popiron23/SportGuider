@@ -14,15 +14,14 @@ class _PasswordInputFieldState extends State<PasswordInputField>
   Widget build(BuildContext context)
   {
     return TextField(
-          textAlign: TextAlign.center,
           decoration:InputDecoration(
           border:OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           hintText: 'Введите пароль',
           hintStyle: TextStyle(color:const Color.fromARGB(255,135,135,135)),
           fillColor: const Color.fromARGB(255, 184, 184,184),
           contentPadding: EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
+          horizontal: 6,
+          vertical: 6,
           ),
           filled:true,
           ),
