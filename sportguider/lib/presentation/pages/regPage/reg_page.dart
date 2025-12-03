@@ -57,7 +57,41 @@ class _RegPageState extends State<RegPage> {
               child: Text(
                 'Регистрация',
                 style: GoogleFonts.philosopher(
-                  fontSize: 28,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.activeColor,
+                ),
+              ),
+            ),
+          ),
+
+          //Надпись "Логин"
+          Positioned(
+            top: 356,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                'Логин',
+                style: GoogleFonts.philosopher(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.activeColor,
+                ),
+              ),
+            ),
+          ),
+
+          //Надпись "Пароль"
+          Positioned(
+            top: 490,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                'Пароль',
+                style: GoogleFonts.philosopher(
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.activeColor,
                 ),
