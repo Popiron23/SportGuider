@@ -112,6 +112,26 @@ class AuthPage extends StatelessWidget {
               style: IconButton.styleFrom(backgroundColor: Colors.white),
             ),
           ),
+
+          //текст ссылка на страницу регистрации
+          Padding(
+            padding: EdgeInsets.only(bottom: 14), // Отступ снизу
+            child: Column(
+              children: [
+                Text(
+                  'Нет аккаунта?',
+                  style: TextStyle(color: AppColors.activeColor),
+                ), // Текст "Нет аккаунта?"
+                TextButton(
+                  onPressed: () {
+                    //Действие при нажатии
+                    print('Кнопка нажата!');
+                  },
+                  child: Text('Зарегестрироваться'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
