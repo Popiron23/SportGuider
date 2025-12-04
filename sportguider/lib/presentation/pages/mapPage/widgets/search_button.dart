@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sportguider/presentation/colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class ProfileButton extends StatelessWidget {
-  const ProfileButton({super.key});
+class SearchButton extends StatelessWidget {
+  const SearchButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class ProfileButton extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/profile-round.svg',
+        'assets/images/search.svg',
         colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
       ),
     );
