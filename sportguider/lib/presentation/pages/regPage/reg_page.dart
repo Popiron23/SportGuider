@@ -113,14 +113,16 @@ class _RegPageState extends State<RegPage> {
           ),
 
           //Стрелочка-возвращение назад
-          Padding(
-            padding: EdgeInsets.all(10), // Отступ со всех сторон
-            child: Icon(
-              Icons.arrow_back,
-              size:50,
-              color: AppColors.activeColor,
-              ),
-          )
+          Positioned(
+            left: 15,
+            top: 30,
+            child: FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Colors.white,
+              child: Icon(Icons.arrow_back, color: AppColors.activeColor),
+              shape: CircleBorder(),
+            ),
+          ),
         ],
       ),
     );

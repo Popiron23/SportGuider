@@ -39,15 +39,12 @@ class _CoachPageState extends State<CoachPage> {
         ),
         
         //Виджет-кнопка "Поиск"
-        Positioned(
-          top: 40, 
-          right: 20,
-          child: Container(
-            width: 50,
-            height: 50,
-            child: SearchButton(),
+          Positioned(
+            top: 20,
+            right:20,
+            child: SearchButton()
           ),
-        ),
+        
 
         //Заготовка для будущего списка тренеров
         Column(
