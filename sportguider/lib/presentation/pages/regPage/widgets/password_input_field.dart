@@ -18,7 +18,7 @@ class _PasswordInputFieldState extends State<PasswordInputField>
           border:OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           hintText: 'Введите пароль',
           hintStyle: TextStyle(color:const Color.fromARGB(255,135,135,135)),
-          fillColor: const Color.fromARGB(255, 184, 184,184),
+          fillColor: const Color.fromARGB(255, 214, 213, 213),
           contentPadding: EdgeInsets.symmetric(
           horizontal: 6,
           vertical: 6,

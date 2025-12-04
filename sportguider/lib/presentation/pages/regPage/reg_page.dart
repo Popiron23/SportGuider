@@ -63,7 +63,7 @@ class _RegPageState extends State<RegPage> {
           
           //Текст "Регистрация"
           Positioned(
-            top: 200,
+            top: 250,
             left: 0,
             right: 0,
             child: Center(
