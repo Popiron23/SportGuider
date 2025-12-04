@@ -109,10 +109,7 @@ class AuthPage extends StatelessWidget {
               ),
               iconSize: 50,
               color: AppColors.activeColor,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: EdgeInsets.all(18),
-              ),
+              style: IconButton.styleFrom(backgroundColor: Colors.white),
             ),
           ),
         ],
