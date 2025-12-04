@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sportguider/routes/router.dart';
 import 'package:sportguider/presentation/pages/authPage/auth_page.dart';
 import 'package:sportguider/presentation/pages/regPage/reg_page.dart';
+import 'package:sportguider/presentation/pages/CoachPage/coach_page.dart';
 
 class SportGuiderApp extends StatefulWidget {
   const SportGuiderApp({super.key});
