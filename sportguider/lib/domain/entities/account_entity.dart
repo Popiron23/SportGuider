@@ -1,21 +1,16 @@
-enum Roles { user, trainer }
-
+import 'package:sportguider/core/enums/role.dart';
 class AccountEntity {
   final int id;
   final String? name;
   final String? email;
   final String? phoneNumber;
-  final DateTime createdAt; //дата создания
-  final bool isActive; // активен ли аккаунт
-  final Roles? role; // например: user, trainer
+  final Role? role; // например: user, coach
 
   const AccountEntity({
     required this.id,
     this.name,
     this.email,
     this.phoneNumber,
-    required this.createdAt,
-    this.isActive = true,
-    this.role = Roles.user,
+    this.role = Role.user,
   });
 }

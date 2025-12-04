@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core: ^4.2.1
+  google_fonts: ^6.1.0
   yandex_maps_mapkit:
     version: ^4.26.0-beta
   auto_route: ^11.0.0
