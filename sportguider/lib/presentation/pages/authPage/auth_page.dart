@@ -92,42 +92,42 @@ class AuthPage extends StatelessWidget {
             ),
           ),
 
-          //Стрелочка-возвращение назад
-          Padding(
-            padding: EdgeInsets.all(10), // Отступ со всех сторон
-            child: IconButton.filled(
-              onPressed: () {
-                // Действие при нажатии
-                print('Кнопка нажата!');
-              },
-              icon: SvgPicture.asset(
-                Icons.arrow_back as String,
-                colorFilter: ColorFilter.mode(
-                  AppColors.activeColor,
-                  BlendMode.srcIn,
-                ),
-              ),
-              iconSize: 50,
-              color: AppColors.activeColor,
-              style: IconButton.styleFrom(backgroundColor: Colors.white),
+          Positioned(
+            left: 15,
+            top: 30,
+            child: FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Colors.white,
+              child: Icon(Icons.arrow_back, color: AppColors.activeColor),
+              shape: CircleBorder(),
             ),
           ),
 
           //текст ссылка на страницу регистрации
-          Padding(
-            padding: EdgeInsets.only(bottom: 14), // Отступ снизу
+          Positioned(
+            bottom: 150,
+            left: 110,
             child: Column(
               children: [
                 Text(
                   'Нет аккаунта?',
-                  style: TextStyle(color: AppColors.activeColor),
+                  style: TextStyle(color: AppColors.unactiveColor),
                 ), // Текст "Нет аккаунта?"
                 TextButton(
                   onPressed: () {
                     //Действие при нажатии
                     print('Кнопка нажата!');
                   },
-                  child: Text('Зарегестрироваться'),
+                  style: ButtonStyle(
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>((
+                      Set<WidgetState> states,
+                    ) {
+                      if (states.contains(WidgetState.pressed))
+                        return Colors.black;
+                      return AppColors.activeColor; // По умолчанию виджет.
+                    }),
+                  ),
+                  child: Text('Зарегистрироваться'),
                 ),
               ],
             ),
