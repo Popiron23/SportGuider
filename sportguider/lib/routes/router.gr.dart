@@ -13,17 +13,17 @@ import 'package:auto_route/auto_route.dart' as _i10;
 import 'package:collection/collection.dart' as _i13;
 import 'package:flutter/material.dart' as _i11;
 import 'package:sportguider/domain/entities/location_entity.dart' as _i12;
-import 'package:sportguider/presentation/pages/authPage/auth_page.dart' as _i1;
-import 'package:sportguider/presentation/pages/coachPage/coach_page.dart'
+import 'package:sportguider/presentation/pages/auth_page/auth_page.dart' as _i1;
+import 'package:sportguider/presentation/pages/coach_page/coach_page.dart'
     as _i2;
-import 'package:sportguider/presentation/pages/coachProfilePage/coachProfile_page.dart'
+import 'package:sportguider/presentation/pages/coachProfile_page/coachProfile_page.dart'
     as _i3;
-import 'package:sportguider/presentation/pages/friendPage/friend_page.dart'
+import 'package:sportguider/presentation/pages/friend_page/friend_page.dart'
     as _i4;
-import 'package:sportguider/presentation/pages/mapPage/map_page.dart' as _i6;
-import 'package:sportguider/presentation/pages/regPage/reg_page.dart' as _i7;
+import 'package:sportguider/presentation/pages/map_page/map_page.dart' as _i6;
+import 'package:sportguider/presentation/pages/reg_page/reg_page.dart' as _i7;
 import 'package:sportguider/presentation/pages/root_page.dart' as _i8;
-import 'package:sportguider/presentation/pages/userProfilePage/userProfile_page.dart'
+import 'package:sportguider/presentation/pages/userProfile_page/userProfile_page.dart'
     as _i9;
 import 'package:sportguider/presentation/widgets/home_page.dart' as _i5;
 

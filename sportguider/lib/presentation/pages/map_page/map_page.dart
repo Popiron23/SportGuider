@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:sportguider/domain/entities/location_entity.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/filter_button.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/geolocation_button.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/profile_button.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/search_button.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_minus_button.dart';
-import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_plus_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/filter_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/geolocation_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/profile_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/search_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/zoom_minus_button.dart';
+import 'package:sportguider/presentation/pages/map_page/widgets/zoom_plus_button.dart';
 import 'package:yandex_maps_mapkit/image.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart';
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
