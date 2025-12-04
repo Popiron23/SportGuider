@@ -27,6 +27,7 @@ class HomePage extends StatelessWidget {
         final currentIndex = tabsRouter.activeIndex;
 
         return BottomNavigationBar(
+          backgroundColor: Colors.white,
           selectedItemColor: AppColors.activeColor,
           unselectedItemColor: AppColors.unactiveColor,
           currentIndex: currentIndex,
