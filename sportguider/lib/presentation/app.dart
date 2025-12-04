@@ -14,6 +14,6 @@ class _SportGuiderAppState extends State<SportGuiderApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home:RegPage()); //.router(routerConfig: _appRouter.config());
+    return MaterialApp.router(routerConfig: _appRouter.config());
   }
 }
