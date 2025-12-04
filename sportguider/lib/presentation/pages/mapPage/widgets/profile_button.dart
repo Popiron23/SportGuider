@@ -13,10 +13,13 @@ class ProfileButton extends StatelessWidget {
         // Действие при нажатии
         print('Кнопка нажата!');
       },
-      icon: Icon(Icons.account_circle_rounded, color: Colors.white),
+      icon: SvgPicture.asset(
+        'assets/images/profile-round.svg',
+        colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
+      ),
       style: IconButton.styleFrom(
-        backgroundColor: AppColors.activeColor,
-        padding: EdgeInsets.zero,
+        backgroundColor: Colors.white,
+        padding: EdgeInsets.all(18),
       ),
     );
   }
