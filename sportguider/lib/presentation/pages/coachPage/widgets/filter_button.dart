@@ -15,7 +15,7 @@ class CoachFilterButton extends StatelessWidget {
       backgroundColor: AppColors.activeColor,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/filter.svg',
+        'assets/images/svg/filter.svg',
         colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
       ),
     );
