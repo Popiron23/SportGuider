@@ -5,6 +5,8 @@ import 'package:sportguider/presentation/pages/regPage/widgets/login_input_field
 import 'package:sportguider/presentation/pages/regPage/widgets/registration_button.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/presentation/widgets/back_button.dart';
+
 @RoutePage()
 class RegPage extends StatefulWidget {
   const RegPage({super.key});
@@ -20,47 +22,30 @@ class _RegPageState extends State<RegPage> {
       body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              left: 60,
-              right: 60,
-              top: 325,
-            ),
+            padding: EdgeInsets.only(left: 60, right: 60, top: 325),
             child: Column(
               children: [
-                
                 //Отступ между виджетом "Логин" и текстом "Регистрация"
                 SizedBox(height: 60),
 
                 //Виджет-логин
-                Container(
-                  width: 320,
-                  height: 35,
-                  child: LoginInputField(),
-                ),
-                
+                Container(width: 320, height: 35, child: LoginInputField()),
+
                 //Отступ между виджетом "Пароль" и виджетом "Логин"
                 SizedBox(height: 70),
-                
+
                 //Виджет-пароль
-                Container(
-                  width: 320,
-                  height: 35,
-                  child: PasswordInputField(),
-                ),
+                Container(width: 320, height: 35, child: PasswordInputField()),
 
                 //Отступ между виджетом "Пароль" и виджетом "Зарегистрироваться"
                 SizedBox(height: 30),
 
                 //Виджет-зарегистрироваться
-                Container(
-                  width: 320,
-                  height: 35,
-                  child: RegistrationButton(),
-                ),
+                Container(width: 320, height: 35, child: RegistrationButton()),
               ],
             ),
           ),
-          
+
           //Текст "Регистрация"
           Positioned(
             top: 250,
@@ -113,16 +98,7 @@ class _RegPageState extends State<RegPage> {
           ),
 
           //Стрелочка-возвращение назад
-          Positioned(
-            left: 15,
-            top: 30,
-            child: FloatingActionButton(
-              onPressed: () {},
-              backgroundColor: Colors.white,
-              child: Icon(Icons.arrow_back, color: AppColors.activeColor),
-              shape: CircleBorder(),
-            ),
-          ),
+          Positioned(left: 15, top: 30, child: BackButtonReg()),
         ],
       ),
     );

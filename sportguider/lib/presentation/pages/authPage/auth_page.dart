@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide BackButton;
+import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sportguider/presentation/widgets/back_button.dart';
 
 @RoutePage()
 class AuthPage extends StatelessWidget {
@@ -14,6 +15,7 @@ class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Padding(
@@ -91,47 +93,11 @@ class AuthPage extends StatelessWidget {
               ),
             ),
           ),
-
-          Positioned(
-            left: 15,
-            top: 30,
-            child: FloatingActionButton(
-              onPressed: () {},
-              backgroundColor: Colors.white,
-              child: Icon(Icons.arrow_back, color: AppColors.activeColor),
-              shape: CircleBorder(),
-            ),
-          ),
+          //кнопка назад
+          Positioned(left: 15, top: 30, child: BackButtonReg()),
 
           //текст ссылка на страницу регистрации
-          Positioned(
-            bottom: 150,
-            left: 110,
-            child: Column(
-              children: [
-                Text(
-                  'Нет аккаунта?',
-                  style: TextStyle(color: AppColors.unactiveColor),
-                ), // Текст "Нет аккаунта?"
-                TextButton(
-                  onPressed: () {
-                    //Действие при нажатии
-                    print('Кнопка нажата!');
-                  },
-                  style: ButtonStyle(
-                    foregroundColor: WidgetStateProperty.resolveWith<Color>((
-                      Set<WidgetState> states,
-                    ) {
-                      if (states.contains(WidgetState.pressed))
-                        return Colors.black;
-                      return AppColors.activeColor; // По умолчанию виджет.
-                    }),
-                  ),
-                  child: Text('Зарегистрироваться'),
-                ),
-              ],
-            ),
-          ),
+          Positioned(bottom: 150, left: 110, child: TextRegButton()),
         ],
       ),
     );
