@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/search_button.dart';
+import 'package:sportguider/presentation/pages/coachPage/widgets/filter_button.dart';
 @RoutePage()
 class CoachPage extends StatefulWidget {
   const CoachPage({super.key});
@@ -15,7 +16,8 @@ class _CoachPageState extends State<CoachPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: SafeArea(
+        child: Stack(
         children: [
           Container(
           color: Colors.white,
@@ -23,7 +25,7 @@ class _CoachPageState extends State<CoachPage> {
 
         // Текст "Тренеры"
         Positioned(
-          top: 40,
+          top: 50,
           left: 0,
           right: 0,
           child: Center(
@@ -40,9 +42,15 @@ class _CoachPageState extends State<CoachPage> {
         
         //Виджет-кнопка "Поиск"
           Positioned(
-            top: 20,
-            right:20,
-            child: SearchButton()
+            top: 5,
+            right:10,
+            child: Row(
+            children: [
+              CoachFilterButton(),
+              const SizedBox(width: 10),
+              SearchButton(),
+              ]
+            )
           ),
         
 
@@ -53,6 +61,7 @@ class _CoachPageState extends State<CoachPage> {
         ],
         )
         ]
+      )
       )
     );
   }
