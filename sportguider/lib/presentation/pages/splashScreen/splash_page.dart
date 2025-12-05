@@ -8,20 +8,15 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            'sportguider/assets/images/icon.svg',
-            colorFilter: ColorFilter.mode(
-              AppColors.activeColor,
-              BlendMode.srcIn,
-            ),
-          ),
-          SpinKitCircle(color: Colors.blue, size: 50.0),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgPicture.asset(
+          'sportguider/assets/images/icon.svg',
+          colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
+        ),
+        SpinKitCircle(color: Colors.blue, size: 50.0),
+      ],
     );
   }
 }
