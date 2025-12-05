@@ -15,7 +15,7 @@ class FilterButton extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/filter.svg',
+        'assets/images/svg/filter.svg',
         colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
       ),
     );

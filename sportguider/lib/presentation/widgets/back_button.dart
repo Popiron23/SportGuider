@@ -13,13 +13,13 @@ class BackButtonReg extends StatefulWidget {
 class _BackButtonRegState extends State<BackButtonReg> {
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
+    return IconButton(
       onPressed: () {
         context.router.back();
       },
-      backgroundColor: Colors.white,
-      shape: CircleBorder(),
-      child: Icon(Icons.arrow_back, color: AppColors.activeColor),
+      // backgroundColor: Colors.white,
+      //shape: CircleBorder(),
+      icon: Icon(Icons.arrow_back, color: AppColors.activeColor),
     );
   }
 }
