@@ -15,7 +15,8 @@ class _CoachPageState extends State<CoachPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: SafeArea(
+        child: Stack(
         children: [
           Container(
           color: Colors.white,
@@ -40,8 +41,8 @@ class _CoachPageState extends State<CoachPage> {
         
         //Виджет-кнопка "Поиск"
           Positioned(
-            top: 20,
-            right:20,
+            top: 5,
+            right:10,
             child: SearchButton()
           ),
         
@@ -53,6 +54,7 @@ class _CoachPageState extends State<CoachPage> {
         ],
         )
         ]
+      )
       )
     );
   }
