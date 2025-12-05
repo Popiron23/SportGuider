@@ -1,0 +1,15 @@
+enum Roles { user, trainer }
+
+class SessionEntity {
+  final int id;
+  final Set<String>? AuthTokens; //токены авторизации
+  final DateTime? LastUsed; //время последнего активности
+  final Roles? role;
+
+  SessionEntity({
+    required this.id,
+    this.AuthTokens,
+    this.LastUsed,
+    this.role = Roles.user,
+  });
+}
