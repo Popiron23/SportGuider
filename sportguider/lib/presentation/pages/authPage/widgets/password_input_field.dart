@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 //import 'package:sportguider/presentation/colors.dart';
 
 class PasswordInputField extends StatefulWidget {
-  const PasswordInputField({super.key});
+  final TextEditingController controller;
+  const PasswordInputField({super.key, required this.controller});
 
   @override
   State<PasswordInputField> createState() => _PasswordInputFieldState();
@@ -12,6 +13,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: widget.controller,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         hintText: 'Введите пароль',

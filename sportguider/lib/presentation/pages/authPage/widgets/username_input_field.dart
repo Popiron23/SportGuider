@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 //import 'package:sportguider/presentation/colors.dart';
 
 class UsernameInputField extends StatefulWidget {
-  const UsernameInputField({super.key});
+  final TextEditingController controller;
+  const UsernameInputField({super.key, required this.controller});
 
   @override
   State<UsernameInputField> createState() => _UsernameInputFieldState();
@@ -12,6 +13,7 @@ class _UsernameInputFieldState extends State<UsernameInputField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: widget.controller,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         hintText: 'Введите логин',

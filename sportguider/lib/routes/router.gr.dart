@@ -12,6 +12,7 @@
 import 'package:auto_route/auto_route.dart' as _i10;
 import 'package:collection/collection.dart' as _i13;
 import 'package:flutter/material.dart' as _i11;
+import 'package:sportguider/domain/entities/account_entity.dart' as _i14;
 import 'package:sportguider/domain/entities/location_entity.dart' as _i12;
 import 'package:sportguider/presentation/pages/authPage/auth_page.dart' as _i1;
 import 'package:sportguider/presentation/pages/coachPage/coach_page.dart'
@@ -194,16 +195,47 @@ class RootRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.UserProfilePage]
-class UserProfileRoute extends _i10.PageRouteInfo<void> {
-  const UserProfileRoute({List<_i10.PageRouteInfo>? children})
-    : super(UserProfileRoute.name, initialChildren: children);
+class UserProfileRoute extends _i10.PageRouteInfo<UserProfileRouteArgs> {
+  UserProfileRoute({
+    _i11.Key? key,
+    required _i14.AccountEntity account,
+    List<_i10.PageRouteInfo>? children,
+  }) : super(
+         UserProfileRoute.name,
+         args: UserProfileRouteArgs(key: key, account: account),
+         initialChildren: children,
+       );
 
   static const String name = 'UserProfileRoute';
 
   static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      return const _i9.UserProfilePage();
+      final args = data.argsAs<UserProfileRouteArgs>();
+      return _i9.UserProfilePage(key: args.key, account: args.account);
     },
   );
+}
+
+class UserProfileRouteArgs {
+  const UserProfileRouteArgs({this.key, required this.account});
+
+  final _i11.Key? key;
+
+  final _i14.AccountEntity account;
+
+  @override
+  String toString() {
+    return 'UserProfileRouteArgs{key: $key, account: $account}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! UserProfileRouteArgs) return false;
+    return key == other.key && account == other.account;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ account.hashCode;
 }
