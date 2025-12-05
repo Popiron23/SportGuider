@@ -21,3 +21,6 @@ SportGuider - мобильное приложение, которое облег
 ## Стек технологий
 
 Flutter, Dart, Firebase 
+
+## Ссылка на фигму
+https://www.figma.com/design/eNP7xowjPx43gKwhz4ufqj/sportguide?node-id=0-1&t=pH67oClCjtoebYpU-1
