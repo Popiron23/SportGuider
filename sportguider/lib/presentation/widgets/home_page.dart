@@ -15,9 +15,24 @@ class HomePage extends StatelessWidget {
       routes: [
         MapRoute(
           locations: [
-            LocationEntity(id: 1, latitude: 55.751225, longitude: 37.62954),
-            LocationEntity(id: 2, latitude: 55.75154, longitude: 37.62932),
-            LocationEntity(id: 3, latitude: 55.89321, longitude: 37.62678),
+            LocationEntity(
+              id: 1,
+              latitude: 55.751225,
+              longitude: 37.62954,
+              name: "СпортШкола Дружба",
+            ),
+            LocationEntity(
+              id: 2,
+              latitude: 55.75154,
+              longitude: 37.62932,
+              name: "СпортШкола ДвижВерх",
+            ),
+            LocationEntity(
+              id: 3,
+              latitude: 55.89321,
+              longitude: 37.62678,
+              name: "СпортШкола Хоккей OneLove",
+            ),
           ],
         ),
         CoachRoute(),
