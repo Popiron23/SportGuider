@@ -16,7 +16,7 @@ class ProfileButton extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/profile-round.svg',
+        'assets/images/svg/profile-round.svg',
         colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
       ),
     );

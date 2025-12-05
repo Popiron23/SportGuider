@@ -3,19 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sportguider/presentation/colors.dart';
 
 class GeolocationButton extends StatelessWidget {
-  const GeolocationButton({super.key});
+  final VoidCallback onPressed;
+
+  const GeolocationButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () {
-        // Действие при нажатии
-        print('Кнопка нажата!');
-      },
+      onPressed: onPressed,
       backgroundColor: Colors.white,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/navigation.svg',
+        'assets/images/svg/navigation.svg',
         colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
       ),
     );

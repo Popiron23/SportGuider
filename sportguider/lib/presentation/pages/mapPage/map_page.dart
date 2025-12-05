@@ -9,6 +9,7 @@ import 'package:sportguider/presentation/pages/mapPage/widgets/search_button.dar
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_minus_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_plus_button.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
 class MapPage extends StatefulWidget {
@@ -20,8 +21,16 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  late final mapKey = GlobalKey();
   late final List<PlacemarkMapObject> mapObjects;
   late final YandexMapController mapController;
+
+  Future<bool> get locationPermissionNotGranted async =>
+      !(await Permission.location.request().isGranted);
+
+  void _showMessage(Text text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: text));
+  }
 
   @override
   void initState() {
@@ -35,7 +44,7 @@ class _MapPageState extends State<MapPage> {
             icon: PlacemarkIcon.single(
               PlacemarkIconStyle(
                 image: BitmapDescriptor.fromAssetImage(
-                  'assets/images/placemark_icon.png',
+                  'assets/images/png/placemark_icon.png',
                 ),
                 scale: 3.0,
               ),
@@ -53,9 +62,23 @@ class _MapPageState extends State<MapPage> {
         builder: (context, constraints) => Stack(
           children: [
             YandexMap(
+              key: mapKey,
               mapObjects: mapObjects,
               onMapCreated: (controller) {
                 mapController = controller;
+              },
+              onUserLocationAdded: (UserLocationView view) async {
+                return view.copyWith(
+                  pin: view.pin.copyWith(
+                    icon: PlacemarkIcon.single(
+                      PlacemarkIconStyle(
+                        image: BitmapDescriptor.fromAssetImage(
+                          'assets/images/png/user.png',
+                        ),
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
             Positioned(left: 15, top: 5, child: ProfileButton()),
@@ -70,7 +93,38 @@ class _MapPageState extends State<MapPage> {
                 ],
               ),
             ),
-            Positioned(right: 10, bottom: 5, child: GeolocationButton()),
+            Positioned(
+              right: 10,
+              bottom: 5,
+              child: GeolocationButton(
+                onPressed: () async {
+                  if (await locationPermissionNotGranted) {
+                    _showMessage(
+                      const Text('Location permission was NOT granted'),
+                    );
+                    return;
+                  }
+
+                  final mediaQuery = MediaQuery.of(context);
+                  final height =
+                      mapKey.currentContext!.size!.height *
+                      mediaQuery.devicePixelRatio;
+                  final width =
+                      mapKey.currentContext!.size!.width *
+                      mediaQuery.devicePixelRatio;
+
+                  await mapController.toggleUserLayer(
+                    visible: true,
+                    autoZoomEnabled: false,
+                    headingEnabled: false,
+                    anchor: UserLocationAnchor(
+                      course: Offset(0.5 * width, 0.5 * height),
+                      normal: Offset(0.5 * width, 0.5 * height),
+                    ),
+                  );
+                },
+              ),
+            ),
 
             Positioned(
               right: 10,

@@ -9,14 +9,13 @@ class SearchButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-
         // Действие при нажатии
         print('Кнопка нажата!');
       },
       backgroundColor: AppColors.activeColor,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/search.svg',
+        'assets/images/svg/search.svg',
         colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
       ),
     );
