@@ -19,6 +19,7 @@ class _RegPageState extends State<RegPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:Colors.white,
       body: Stack(
         children: [
           Padding(
