@@ -22,6 +22,12 @@ dev_dependencies:
   flutter_svg: ^2.2.3
   auto_route_generator: ^10.4.0
   build_runner: ^2.10.4
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 flutter:
   uses-material-design: true
