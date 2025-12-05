@@ -24,3 +24,6 @@ Flutter, Dart, Firebase
 
 ## Ссылка на фигму
 https://www.figma.com/design/eNP7xowjPx43gKwhz4ufqj/sportguide?node-id=0-1&t=pH67oClCjtoebYpU-1
+
+### вход в личный профиль
+логин: admin, пароль: admin
