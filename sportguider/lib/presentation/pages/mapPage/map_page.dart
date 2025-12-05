@@ -3,14 +3,12 @@ import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:sportguider/domain/entities/location_entity.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/filter_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/geolocation_button.dart';
+import 'package:sportguider/presentation/pages/mapPage/widgets/modal_body_view.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/profile_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/search_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_minus_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_plus_button.dart';
-import 'package:yandex_maps_mapkit/image.dart';
-import 'package:yandex_maps_mapkit/mapkit.dart';
-import 'package:yandex_maps_mapkit/mapkit_factory.dart';
-import 'package:yandex_maps_mapkit/yandex_map.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 @RoutePage()
 class MapPage extends StatefulWidget {
@@ -22,10 +20,29 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  late final List<PlacemarkMapObject> mapObjects;
+
   @override
   void initState() {
-    mapkit.onStart();
     super.initState();
+    mapObjects = widget.locations
+        .map(
+          (e) => PlacemarkMapObject(
+            mapId: MapObjectId(e.id.toString()),
+            point: Point(latitude: e.latitude, longitude: e.longitude),
+            onTap: (self, point) => _onPlacemarkTap(context, e),
+            icon: PlacemarkIcon.single(
+              PlacemarkIconStyle(
+                image: BitmapDescriptor.fromAssetImage(
+                  'assets/images/placemark_icon.png',
+                ),
+                scale: 3.0,
+              ),
+            ),
+            opacity: 1.0,
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -34,7 +51,7 @@ class _MapPageState extends State<MapPage> {
       child: LayoutBuilder(
         builder: (context, constraints) => Stack(
           children: [
-            YandexMap(onMapCreated: _onMapCreated),
+            YandexMap(mapObjects: mapObjects),
             Positioned(left: 15, top: 5, child: ProfileButton()),
             Positioned(
               right: 10,
@@ -67,23 +84,9 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void _onMapCreated(MapWindow mapWindow) {
-    for (final location in widget.locations) {
-      final (lat, lon) = (location.latitude, location.longitude);
-
-      mapWindow.map.mapObjects.addPlacemark()
-        ..geometry = Point(latitude: lat, longitude: lon)
-        ..setIcon(
-          ImageProvider.fromImageProvider(
-            AssetImage("assets/images/placemark_icon.png"),
-          ),
-        );
-    }
-  }
-
-  @override
-  void dispose() {
-    mapkit.onStop();
-    super.dispose();
-  }
+  void _onPlacemarkTap(BuildContext context, LocationEntity location) =>
+      showModalBottomSheet(
+        context: context,
+        builder: (context) => ModalBodyView(location: location),
+      );
 }
