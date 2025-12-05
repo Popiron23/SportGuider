@@ -21,6 +21,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late final List<PlacemarkMapObject> mapObjects;
+  late final YandexMapController mapController;
 
   @override
   void initState() {
@@ -51,7 +52,12 @@ class _MapPageState extends State<MapPage> {
       child: LayoutBuilder(
         builder: (context, constraints) => Stack(
           children: [
-            YandexMap(mapObjects: mapObjects),
+            YandexMap(
+              mapObjects: mapObjects,
+              onMapCreated: (controller) {
+                mapController = controller;
+              },
+            ),
             Positioned(left: 15, top: 5, child: ProfileButton()),
             Positioned(
               right: 10,
@@ -72,9 +78,15 @@ class _MapPageState extends State<MapPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ZoomPlusButton(),
+                  ZoomPlusButton(
+                    onPressed: () =>
+                        mapController.moveCamera(CameraUpdate.zoomIn()),
+                  ),
                   const SizedBox(height: 10),
-                  ZoomMinusButton(),
+                  ZoomMinusButton(
+                    onPressed: () =>
+                        mapController.moveCamera(CameraUpdate.zoomOut()),
+                  ),
                 ],
               ),
             ),
@@ -87,6 +99,11 @@ class _MapPageState extends State<MapPage> {
   void _onPlacemarkTap(BuildContext context, LocationEntity location) =>
       showModalBottomSheet(
         context: context,
-        builder: (context) => ModalBodyView(location: location),
+        isScrollControlled: true,
+        builder: (context) => FractionallySizedBox(
+          heightFactor: 0.4,
+          widthFactor: 1.0,
+          child: ModalBodyView(location: location),
+        ),
       );
 }
