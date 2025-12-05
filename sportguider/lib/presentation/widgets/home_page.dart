@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
             LocationEntity(
               id: 2,
               latitude: 55.75154,
-              longitude: 37.62932,
+              longitude: 38.62932,
               name: "СпортШкола ДвижВерх",
             ),
             LocationEntity(
