@@ -15,7 +15,7 @@ class SearchButton extends StatelessWidget {
       backgroundColor: Colors.white,
       shape: CircleBorder(),
       child: SvgPicture.asset(
-        'assets/images/search.svg',
+        'assets/images/svg/search.svg',
         colorFilter: ColorFilter.mode(AppColors.activeColor, BlendMode.srcIn),
       ),
     );

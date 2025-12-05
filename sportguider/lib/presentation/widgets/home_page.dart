@@ -52,7 +52,7 @@ class HomePage extends StatelessWidget {
             BottomNavigationBarItem(
               label: 'Карты',
               icon: SvgPicture.asset(
-                'assets/images/map.svg',
+                'assets/images/svg/map.svg',
                 colorFilter: ColorFilter.mode(
                   currentIndex == 0
                       ? AppColors.activeColor
@@ -64,7 +64,7 @@ class HomePage extends StatelessWidget {
             BottomNavigationBarItem(
               label: 'Тренеры',
               icon: SvgPicture.asset(
-                'assets/images/dribbble.svg',
+                'assets/images/svg/dribbble.svg',
                 colorFilter: ColorFilter.mode(
                   currentIndex == 1
                       ? AppColors.activeColor
@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
             BottomNavigationBarItem(
               label: 'Друзья',
               icon: SvgPicture.asset(
-                'assets/images/users.svg',
+                'assets/images/svg/users.svg',
                 colorFilter: ColorFilter.mode(
                   currentIndex == 2
                       ? AppColors.activeColor
