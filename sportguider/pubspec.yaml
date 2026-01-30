@@ -9,7 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_auth: ^6.1.4 
   firebase_core: ^4.2.1
+  email_validator: ^2.1.17
+  equatable: ^2.0.8
   google_fonts: ^6.1.0
   yandex_mapkit: ^4.2.1
   auto_route: ^11.0.0 
