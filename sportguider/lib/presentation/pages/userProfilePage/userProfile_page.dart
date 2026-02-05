@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/presentation/widgets/back_button.dart';
 
@@ -59,6 +60,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
             Text('Тренеры: '),
             ...widget.account.coaches.map((e) => Text(e)),
           ],
+        ),
+        TextButton(
+          onPressed: () {
+            FirebaseService().logOut();
+          },
+          child: Text('Logout'),
         ),
       ],
     ),

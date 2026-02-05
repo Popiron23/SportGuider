@@ -1,7 +1,8 @@
 import 'package:sportguider/core/enums/role.dart';
+import 'package:sportguider/data/models/account_model.dart';
 
 class AccountEntity {
-  final int id;
+  final String id;
   final String? name;
   final String? email;
   final String? phoneNumber;
@@ -18,4 +19,15 @@ class AccountEntity {
     this.favoriteSport,
     this.coaches = const [],
   });
+
+  AccountEntity.fromModel(AccountModel model)
+    : this(
+        id: model.id,
+        name: model.name,
+        email: model.email,
+        phoneNumber: model.phoneNumber,
+        role: model.role,
+        favoriteSport: model.favoriteSport,
+        coaches: model.coaches,
+      );
 }
