@@ -106,6 +106,7 @@ class _AuthPageState extends State<AuthPage> {
                 onPressed: () async {
                   final email = usernameController.text;
                   final password = passwordController.text;
+                  var _errorMes = null;
                   if (email == 'admin' && password == 'admin') {
                     context.router.replace(
                       UserProfileRoute(
@@ -120,19 +121,28 @@ class _AuthPageState extends State<AuthPage> {
                       ),
                     );
                   } else {
-                    final credential = await FirebaseService.onLogin(
+                    final result = await FirebaseService.onLogin(
                       email: email,
                       password: password,
                     );
-                    context.router.replace(
-                      //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
-                      //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
-                      UserProfileRoute(
-                        account: AccountEntity.fromModel(
-                          AccountModel.fromFirebaseUser(credential!.user),
+                    if (result!.isSuccess) {
+                      context.router.replace(
+                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
+                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
+                        UserProfileRoute(
+                          account: AccountEntity.fromModel(
+                            AccountModel.fromFirebaseUser(
+                              result!.credential!.user,
+                            ),
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      _errorMes = result.errorMes;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
+                    }
                   }
                 },
               ),

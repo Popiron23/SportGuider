@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sportguider/core/utils/AuthResult/auth_result.dart';
 
 class FirebaseService {
   static final FirebaseService _singleton = FirebaseService._internal();
@@ -16,7 +17,8 @@ class FirebaseService {
     auth.authStateChanges().listen(doListen);
   }
 
-  static Future<UserCredential?> onLogin({
+  //Firebase авторизация аккаунта
+  static Future<AuthResult?> onLogin({
     required String email,
     required String password,
   }) async {
@@ -25,36 +27,23 @@ class FirebaseService {
         email: email,
         password: password,
       );
-      return credential;
+      return AuthResult.succes(credential);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-        return null;
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-        return null;
-      }
+      return AuthResult.fromException(e);
     }
   }
 
-  static Future<UserCredential?> onRegister({
+  //Firebase регистрация аккаунта
+  static Future<AuthResult?> onRegister({
     required String email,
     required String password,
   }) async {
     try {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      return credential;
+      return AuthResult.succes(credential);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-        return null;
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-        return null;
-      }
-    } catch (e) {
-      print(e);
+      return AuthResult.fromException(e);
     }
   }
 
