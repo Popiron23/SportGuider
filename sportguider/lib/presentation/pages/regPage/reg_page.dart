@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
@@ -14,6 +15,7 @@ import 'package:sportguider/presentation/widgets/back_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 @RoutePage()
 class RegPage extends StatefulWidget {
@@ -26,6 +28,17 @@ class RegPage extends StatefulWidget {
 class _RegPageState extends State<RegPage> {
   late final TextEditingController emailController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+  late String roleController = 'user';
+
+  late DatabaseReference dbRefUsers;
+  late DatabaseReference dbRefCoaches;
+
+  @override
+  void initState() {
+    super.initState();
+    dbRefUsers = FirebaseDatabase.instance.ref().child('Users');
+    dbRefCoaches = FirebaseDatabase.instance.ref().child('Coaches');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +105,14 @@ class _RegPageState extends State<RegPage> {
                 AppColors.activeColor,
                 AppColors.activeColor,
               ],
-              labels: ['Тренер', 'Спортсмен'],
+              labels: ['Спортсмен', 'Тренер'],
               onToggle: (index) {
                 print('switched to: $index');
+                if (index == 'Спортсмен') {
+                  roleController = 'user';
+                } else {
+                  roleController = 'coach';
+                }
               },
             ),
             SizedBox(height: 30),
@@ -105,45 +123,42 @@ class _RegPageState extends State<RegPage> {
               child: AuthButton(
                 title: 'Зарегистрироваться',
                 onPressed: () async {
-                  final email = emailController.text;
-                  final password = passwordController.text;
                   var _errorMes = null;
-                  if (email == 'admin' && password == 'admin') {
+                  final result = await FirebaseService.onRegister(
+                    email: emailController.text,
+                    password: passwordController.text,
+                  );
+                  if (result!.isSuccess) {
+                    if (roleController == 'user') {
+                      final Map<String, String> users = {
+                        'email': emailController.text,
+                        'role': roleController,
+                      };
+                      dbRefUsers.push().set(users);
+                    } else {
+                      final Map<String, String> coaches = {
+                        'email': emailController.text,
+                        'role': roleController,
+                      };
+                      dbRefCoaches.push().set(coaches);
+                    }
+
                     context.router.replace(
+                      //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
+                      //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
                       UserProfileRoute(
-                        account: AccountEntity(
-                          id: '1',
-                          name: 'Иванов Иван',
-                          email: 'example@mail.com',
-                          phoneNumber: '+7900123123',
-                          favoriteSport: 'Баскетбол',
-                          coaches: ['Петров Петр Петрович'],
+                        account: AccountEntity.fromModel(
+                          AccountModel.fromFirebaseUser(
+                            result.credential!.user,
+                          ),
                         ),
                       ),
                     );
                   } else {
-                    final result = await FirebaseService.onRegister(
-                      email: email,
-                      password: password,
-                    );
-                    if (result!.isSuccess) {
-                      context.router.replace(
-                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
-                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
-                        UserProfileRoute(
-                          account: AccountEntity.fromModel(
-                            AccountModel.fromFirebaseUser(
-                              result.credential!.user,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      _errorMes = result.errorMes;
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
-                    }
+                    _errorMes = result.errorMes;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(_errorMes)));
                   }
                 },
               ),

@@ -91,7 +91,7 @@ class _AuthPageState extends State<AuthPage> {
                 AppColors.activeColor,
                 AppColors.activeColor,
               ],
-              labels: ['Тренер', 'Спортсмен'],
+              labels: ['Спортсмен', 'Тренер'],
               onToggle: (index) {
                 print('switched to: $index');
               },
