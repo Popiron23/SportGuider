@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
+import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
@@ -100,14 +103,15 @@ class _AuthPageState extends State<AuthPage> {
               height: 35,
               child: AuthButton(
                 title: 'Войти',
-                onPressed: () {
-                  final name = usernameController.text;
+                onPressed: () async {
+                  final email = usernameController.text;
                   final password = passwordController.text;
-                  if (name == 'admin' && password == 'admin') {
+                  var _errorMes = null;
+                  if (email == 'admin' && password == 'admin') {
                     context.router.replace(
                       UserProfileRoute(
                         account: AccountEntity(
-                          id: 1,
+                          id: '1',
                           name: 'Иванов Иван',
                           email: 'example@mail.com',
                           phoneNumber: '+7900123123',
@@ -116,6 +120,29 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                     );
+                  } else {
+                    final result = await FirebaseService.onLogin(
+                      email: email,
+                      password: password,
+                    );
+                    if (result!.isSuccess) {
+                      context.router.replace(
+                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
+                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
+                        UserProfileRoute(
+                          account: AccountEntity.fromModel(
+                            AccountModel.fromFirebaseUser(
+                              result!.credential!.user,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      _errorMes = result.errorMes;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
+                    }
                   }
                 },
               ),

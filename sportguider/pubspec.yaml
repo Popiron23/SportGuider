@@ -9,13 +9,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_auth: ^6.1.4 
   firebase_core: ^4.2.1
+  email_validator: ^2.1.17
+  equatable: ^2.0.8
   google_fonts: ^6.1.0
   yandex_mapkit: ^4.2.1
   auto_route: ^11.0.0 
   salomon_bottom_bar: ^3.1.0
   permission_handler: ^12.0.1
   toggle_switch: ^2.3.0
+  flutter_bloc: ^9.1.1
+  google_sign_in: ^6.0.0
+  flutter_cache_manager: ^3.4.1
+  meta: ^1.8.0
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

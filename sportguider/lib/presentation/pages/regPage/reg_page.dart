@@ -1,15 +1,19 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
+import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/presentation/pages/regPage/widgets/login_input_field.dart';
 import 'package:sportguider/presentation/widgets/back_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 @RoutePage()
 class RegPage extends StatefulWidget {
@@ -20,7 +24,7 @@ class RegPage extends StatefulWidget {
 }
 
 class _RegPageState extends State<RegPage> {
-  late final TextEditingController usernameController = TextEditingController();
+  late final TextEditingController emailController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
 
   @override
@@ -55,7 +59,7 @@ class _RegPageState extends State<RegPage> {
             Container(
               width: 320,
               height: 35,
-              child: UsernameInputField(controller: usernameController),
+              child: LoginInputField(controller: emailController),
             ),
             //Отступ между виджетом "Пароль" и виджетом "Логин"
             SizedBox(height: 30),
@@ -100,14 +104,15 @@ class _RegPageState extends State<RegPage> {
               height: 35,
               child: AuthButton(
                 title: 'Зарегистрироваться',
-                onPressed: () {
-                  final name = usernameController.text;
+                onPressed: () async {
+                  final email = emailController.text;
                   final password = passwordController.text;
-                  if (name == 'admin' && password == 'admin') {
+                  var _errorMes = null;
+                  if (email == 'admin' && password == 'admin') {
                     context.router.replace(
                       UserProfileRoute(
                         account: AccountEntity(
-                          id: 1,
+                          id: '1',
                           name: 'Иванов Иван',
                           email: 'example@mail.com',
                           phoneNumber: '+7900123123',
@@ -116,6 +121,29 @@ class _RegPageState extends State<RegPage> {
                         ),
                       ),
                     );
+                  } else {
+                    final result = await FirebaseService.onRegister(
+                      email: email,
+                      password: password,
+                    );
+                    if (result!.isSuccess) {
+                      context.router.replace(
+                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
+                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
+                        UserProfileRoute(
+                          account: AccountEntity.fromModel(
+                            AccountModel.fromFirebaseUser(
+                              result.credential!.user,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      _errorMes = result.errorMes;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
+                    }
                   }
                 },
               ),
