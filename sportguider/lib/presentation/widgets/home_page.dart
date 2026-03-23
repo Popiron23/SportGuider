@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:sportguider/domain/entities/location_entity.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/routes/router.gr.dart';
 
@@ -12,32 +11,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsScaffold(
-      routes: [
-        MapRoute(
-          locations: [
-            LocationEntity(
-              id: 1,
-              latitude: 55.751225,
-              longitude: 37.62954,
-              name: "СпортШкола Дружба",
-            ),
-            LocationEntity(
-              id: 2,
-              latitude: 55.75154,
-              longitude: 38.62932,
-              name: "СпортШкола ДвижВерх",
-            ),
-            LocationEntity(
-              id: 3,
-              latitude: 55.89321,
-              longitude: 37.62678,
-              name: "СпортШкола Хоккей OneLove",
-            ),
-          ],
-        ),
-        CoachRoute(),
-        FriendRoute(),
-      ],
+      routes: [MapRoute(), CoachRoute(), FriendRoute()],
       bottomNavigationBuilder: (_, tabsRouter) {
         final currentIndex = tabsRouter.activeIndex;
 
