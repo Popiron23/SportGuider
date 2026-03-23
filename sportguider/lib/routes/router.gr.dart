@@ -111,15 +111,12 @@ class HomeRoute extends _i10.PageRouteInfo<void> {
 /// generated route for
 /// [_i6.MapPage]
 class MapRoute extends _i10.PageRouteInfo<MapRouteArgs> {
-  MapRoute({
-    _i11.Key? key,
-    required List<_i12.LocationEntity> locations,
-    List<_i10.PageRouteInfo>? children,
-  }) : super(
-         MapRoute.name,
-         args: MapRouteArgs(key: key, locations: locations),
-         initialChildren: children,
-       );
+  MapRoute({_i11.Key? key, List<_i10.PageRouteInfo>? children})
+    : super(
+        MapRoute.name,
+        args: MapRouteArgs(key: key),
+        initialChildren: children,
+      );
 
   static const String name = 'MapRoute';
 
@@ -127,38 +124,20 @@ class MapRoute extends _i10.PageRouteInfo<MapRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<MapRouteArgs>();
-      return _i6.MapPage(key: args.key, locations: args.locations);
+      return _i6.MapPage(key: args.key);
     },
   );
 }
 
 class MapRouteArgs {
-  const MapRouteArgs({this.key, required this.locations});
+  const MapRouteArgs({this.key});
 
   final _i11.Key? key;
 
-  final List<_i12.LocationEntity> locations;
-
   @override
   String toString() {
-    return 'MapRouteArgs{key: $key, locations: $locations}';
+    return 'MapRouteArgs{key: $key}';
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! MapRouteArgs) return false;
-    return key == other.key &&
-        const _i13.ListEquality<_i12.LocationEntity>().equals(
-          locations,
-          other.locations,
-        );
-  }
-
-  @override
-  int get hashCode =>
-      key.hashCode ^
-      const _i13.ListEquality<_i12.LocationEntity>().hash(locations);
 }
 
 /// generated route for
