@@ -1,49 +1,93 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileCustomization {
-  final String displayName;
-  final String shortDescription;
-  final int avatarIndex;
+  final String? displayName;
+  final String? shortDescription;
+  final int? avatarIndex;
+  final String? contactEmail;
+  final String? contactPhone;
+  final String? preferredContactMethod;
+  final String? favoriteSport;
+  final String? trainingGoal;
+  final String? currentFocus;
 
   const UserProfileCustomization({
-    required this.displayName,
-    required this.shortDescription,
-    required this.avatarIndex,
+    this.displayName,
+    this.shortDescription,
+    this.avatarIndex,
+    this.contactEmail,
+    this.contactPhone,
+    this.preferredContactMethod,
+    this.favoriteSport,
+    this.trainingGoal,
+    this.currentFocus,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'displayName': displayName,
+      'shortDescription': shortDescription,
+      'avatarIndex': avatarIndex,
+      'contactEmail': contactEmail,
+      'contactPhone': contactPhone,
+      'preferredContactMethod': preferredContactMethod,
+      'favoriteSport': favoriteSport,
+      'trainingGoal': trainingGoal,
+      'currentFocus': currentFocus,
+    };
+  }
+
+  factory UserProfileCustomization.fromJson(Map<String, dynamic> json) {
+    return UserProfileCustomization(
+      displayName: json['displayName'] as String?,
+      shortDescription: json['shortDescription'] as String?,
+      avatarIndex: json['avatarIndex'] as int?,
+      contactEmail: json['contactEmail'] as String?,
+      contactPhone: json['contactPhone'] as String?,
+      preferredContactMethod: json['preferredContactMethod'] as String?,
+      favoriteSport: json['favoriteSport'] as String?,
+      trainingGoal: json['trainingGoal'] as String?,
+      currentFocus: json['currentFocus'] as String?,
+    );
+  }
 }
 
 class ProfileCustomizationStorage {
-  static String _displayNameKey(String accountId) =>
-      'user_profile_display_name_$accountId';
-
-  static String _descriptionKey(String accountId) =>
-      'user_profile_short_description_$accountId';
-
-  static String _avatarKey(String accountId) => 'user_profile_avatar_$accountId';
+  static String _userProfileKey(String accountId) =>
+      'user_profile_customization_$accountId';
 
   static Future<UserProfileCustomization> readUserCustomization(
     String accountId,
   ) async {
     final preferences = await SharedPreferences.getInstance();
+    final rawJson = preferences.getString(_userProfileKey(accountId));
 
-    return UserProfileCustomization(
-      displayName: preferences.getString(_displayNameKey(accountId)) ?? '',
-      shortDescription:
-          preferences.getString(_descriptionKey(accountId)) ?? '',
-      avatarIndex: preferences.getInt(_avatarKey(accountId)) ?? 0,
-    );
+    if (rawJson == null || rawJson.isEmpty) {
+      return const UserProfileCustomization();
+    }
+
+    try {
+      final decoded = jsonDecode(rawJson);
+      if (decoded is! Map<String, dynamic>) {
+        return const UserProfileCustomization();
+      }
+
+      return UserProfileCustomization.fromJson(decoded);
+    } catch (_) {
+      return const UserProfileCustomization();
+    }
   }
 
   static Future<void> saveUserCustomization({
     required String accountId,
-    required String displayName,
-    required String shortDescription,
-    required int avatarIndex,
+    required UserProfileCustomization customization,
   }) async {
     final preferences = await SharedPreferences.getInstance();
-
-    await preferences.setString(_displayNameKey(accountId), displayName);
-    await preferences.setString(_descriptionKey(accountId), shortDescription);
-    await preferences.setInt(_avatarKey(accountId), avatarIndex);
+    await preferences.setString(
+      _userProfileKey(accountId),
+      jsonEncode(customization.toJson()),
+    );
   }
 }
