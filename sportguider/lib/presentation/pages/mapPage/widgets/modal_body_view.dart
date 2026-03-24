@@ -12,8 +12,9 @@ class ModalBodyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -25,12 +26,17 @@ class ModalBodyView extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            '${location.latitude}, ${location.longitude}',
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            'Вид спорта: ${location.sport.ru}',
+            style: GoogleFonts.philosopher(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 20),
           Text(
-            location.sport.ru,
+            'Описание: ${location.description ?? ''}',
+            style: GoogleFonts.philosopher(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Тренеры: ${location.coaches ?? ''}',
             style: GoogleFonts.philosopher(fontSize: 16, color: Colors.grey),
           ),
         ],
