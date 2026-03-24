@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +8,7 @@ import 'package:sportguider/data/repositories/locations_repository.dart';
 import 'package:sportguider/domain/entities/location_entity.dart';
 import 'package:sportguider/presentation/bloc/locations_bloc.dart';
 import 'package:sportguider/presentation/bloc/locations_state.dart';
+import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/filter_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/geolocation_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/modal_body_view.dart';
@@ -18,7 +22,6 @@ import 'package:permission_handler/permission_handler.dart';
 @RoutePage()
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
-
   @override
   State<MapPage> createState() => _MapPageState();
 }
@@ -27,7 +30,9 @@ class _MapPageState extends State<MapPage> {
   late final mapKey = GlobalKey();
 
   late final YandexMapController mapController;
-
+  final MapObjectId largeMapObjectId = const MapObjectId(
+    'large_clusterized_placemark_collection',
+  );
   Future<bool> get locationPermissionNotGranted async =>
       !(await Permission.location.request().isGranted);
 
@@ -35,25 +40,154 @@ class _MapPageState extends State<MapPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: text));
   }
 
-  List<PlacemarkMapObject> _updateLocations(List<LocationEntity> locations) {
-    return locations
-        .map(
-          (e) => PlacemarkMapObject(
-            mapId: MapObjectId(e.id.toString()),
-            point: Point(latitude: e.latitude, longitude: e.longitude),
-            onTap: (self, point) => _onPlacemarkTap(context, e),
-            icon: PlacemarkIcon.single(
-              PlacemarkIconStyle(
-                image: BitmapDescriptor.fromAssetImage(
-                  'assets/images/png/placemark_icon.png',
+  Future<Uint8List> _buildClusterAppearance(Cluster cluster) async {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    const size = Size(200, 200);
+    final fillPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    final strokePaint = Paint()
+      ..color = AppColors.activeColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10;
+    const radius = 60.0;
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: cluster.size.toString(),
+        style: const TextStyle(color: Colors.black, fontSize: 50),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(minWidth: 0, maxWidth: size.width);
+
+    final textOffset = Offset(
+      (size.width - textPainter.width) / 2,
+      (size.height - textPainter.height) / 2,
+    );
+    final circleOffset = Offset(size.height / 2, size.width / 2);
+
+    canvas.drawCircle(circleOffset, radius, fillPaint);
+    canvas.drawCircle(circleOffset, radius, strokePaint);
+    textPainter.paint(canvas, textOffset);
+
+    final image = await recorder.endRecording().toImage(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
+    final pngBytes = await image.toByteData(format: ImageByteFormat.png);
+
+    return pngBytes!.buffer.asUint8List();
+  }
+
+  BoundingBox? _getBoundingBoxForPoints(List<PlacemarkMapObject> points) {
+    if (points.isEmpty) return null;
+
+    double minLat = double.infinity;
+    double maxLat = -double.infinity;
+    double minLon = double.infinity;
+    double maxLon = -double.infinity;
+
+    for (final placemark in points) {
+      final point = placemark.point;
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLon) minLon = point.longitude;
+      if (point.longitude > maxLon) maxLon = point.longitude;
+    }
+
+    // Добавляем небольшой отступ (padding) по краям, чтобы точки не были впритык к краю экрана
+    final latPadding = (maxLat - minLat) * 0.15;
+    final lonPadding = (maxLon - minLon) * 0.15;
+
+    return BoundingBox(
+      southWest: Point(
+        latitude: minLat - latPadding,
+        longitude: minLon - lonPadding,
+      ),
+      northEast: Point(
+        latitude: maxLat + latPadding,
+        longitude: maxLon + lonPadding,
+      ),
+    );
+  }
+
+  List<MapObject> _updateLocations(List<LocationEntity> locations) {
+    List<MapObject> mapObjects = [];
+    final largeMapObject = ClusterizedPlacemarkCollection(
+      mapId: largeMapObjectId,
+      radius: 90,
+      minZoom: 15,
+      onClusterAdded:
+          (ClusterizedPlacemarkCollection self, Cluster cluster) async {
+            return cluster.copyWith(
+              appearance: cluster.appearance.copyWith(
+                opacity: 0.75,
+                icon: PlacemarkIcon.single(
+                  PlacemarkIconStyle(
+                    image: BitmapDescriptor.fromBytes(
+                      await _buildClusterAppearance(cluster),
+                    ),
+                    scale: 1,
+                  ),
                 ),
-                scale: 3.0,
+              ),
+            );
+          },
+      onClusterTap: (ClusterizedPlacemarkCollection self, Cluster cluster) async {
+        final pointsInCluster = cluster.placemarks;
+
+        if (pointsInCluster.isEmpty) {
+          return;
+        }
+
+        // 2. Если в кластере всего одна точка, просто приближаем к ней
+        if (pointsInCluster.length == 1) {
+          await mapController.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: pointsInCluster.first.point,
+                zoom: 17.0, // Комфортный зум для одной точки
               ),
             ),
-            opacity: 1.0,
-          ),
-        )
-        .toList();
+            animation: MapAnimation(type: MapAnimationType.smooth),
+          );
+          return;
+        }
+
+        // 3. Для нескольких точек вычисляем BoundingBox и устанавливаем камеру
+        final boundingBox = _getBoundingBoxForPoints(pointsInCluster);
+
+        if (boundingBox != null) {
+          await mapController.moveCamera(
+            CameraUpdate.newGeometry(Geometry.fromBoundingBox(boundingBox)),
+            animation: MapAnimation(type: MapAnimationType.smooth),
+          );
+        }
+      },
+      placemarks: locations
+          .map(
+            (e) => PlacemarkMapObject(
+              mapId: MapObjectId(e.id.toString()),
+              point: Point(latitude: e.latitude, longitude: e.longitude),
+              onTap: (self, point) => _onPlacemarkTap(context, e),
+              icon: PlacemarkIcon.single(
+                PlacemarkIconStyle(
+                  image: BitmapDescriptor.fromAssetImage(
+                    'assets/images/png/placemark_icon.png',
+                  ),
+                  scale: 3.0,
+                ),
+              ),
+              opacity: 1.0,
+            ),
+          )
+          .toList(),
+    );
+    mapObjects.add(largeMapObject);
+    return mapObjects;
   }
 
   @override
