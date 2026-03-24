@@ -30,4 +30,24 @@ class AccountEntity {
         favoriteSport: model.favoriteSport,
         coaches: model.coaches,
       );
+
+  AccountEntity copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? phoneNumber,
+    Role? role,
+    String? favoriteSport,
+    List<String>? coaches,
+  }) {
+    return AccountEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      role: role ?? this.role,
+      favoriteSport: favoriteSport ?? this.favoriteSport,
+      coaches: coaches ?? this.coaches,
+    );
+  }
 }
