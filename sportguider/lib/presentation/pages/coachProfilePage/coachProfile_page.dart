@@ -59,7 +59,7 @@ class CoachProfilePage extends StatelessWidget {
         ),
         ProfileEditOption(
           icon: Icons.military_tech_outlined,
-          title: 'Экспертиза',
+          title: 'Специализация',
           subtitle:
               'Направления подготовки, спортивные акценты и достижения.',
         ),

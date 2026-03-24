@@ -23,11 +23,13 @@ class ProfileEditOption {
   final IconData icon;
   final String title;
   final String subtitle;
+  final Future<void> Function(BuildContext context)? onTap;
 
   const ProfileEditOption({
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 }
 
@@ -44,6 +46,7 @@ class ProfileShell extends StatelessWidget {
   final List<ProfileMetric> metrics;
   final List<ProfileEditOption> editOptions;
   final List<Widget> sections;
+  final Widget? avatar;
   final Future<void> Function(BuildContext context) onLogout;
 
   const ProfileShell({
@@ -60,6 +63,7 @@ class ProfileShell extends StatelessWidget {
     required this.metrics,
     required this.editOptions,
     required this.sections,
+    this.avatar,
     required this.onLogout,
   });
 
@@ -80,57 +84,54 @@ class ProfileShell extends StatelessWidget {
                   headline: headline,
                   description: description,
                   badgeText: activityBadge,
+                  editButtonLabel: editButtonLabel,
                   accentColor: accentColor,
                   secondaryAccentColor: secondaryAccentColor,
-                  editButtonLabel: editButtonLabel,
+                  avatar: avatar,
                   onEdit: () => _showEditSheet(context),
                 ),
               ),
-              Transform.translate(
-                offset: const Offset(0, -36),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: metrics
-                            .map((metric) => _ProfileMetricCard(metric: metric))
-                            .toList(),
-                      ),
-                      const SizedBox(height: 20),
-                      ...sections
-                          .expand(
-                            (section) => [section, const SizedBox(height: 16)],
-                          )
-                          .toList()
-                        ..removeLast(),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async => onLogout(context),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.dangerColor,
-                            side: BorderSide(color: AppColors.dangerColor),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                child: Column(
+                  children: [
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: metrics
+                          .map((metric) => _ProfileMetricCard(metric: metric))
+                          .toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    for (var index = 0; index < sections.length; index++) ...[
+                      sections[index],
+                      if (index != sections.length - 1)
+                        const SizedBox(height: 16),
+                    ],
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async => onLogout(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.dangerColor,
+                          side: BorderSide(color: AppColors.dangerColor),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          icon: const Icon(Icons.logout_rounded),
-                          label: Text(
-                            'Выйти из аккаунта',
-                            style: GoogleFonts.philosopher(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        ),
+                        icon: const Icon(Icons.logout_rounded),
+                        label: Text(
+                          'Выйти из аккаунта',
+                          style: GoogleFonts.philosopher(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -141,11 +142,13 @@ class ProfileShell extends StatelessWidget {
   }
 
   void _showEditSheet(BuildContext context) {
+    final pageContext = context;
+
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => FractionallySizedBox(
+      builder: (sheetContext) => FractionallySizedBox(
         heightFactor: 0.58,
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -178,7 +181,7 @@ class ProfileShell extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Точку входа под редактирование я оформил. Сохранение можно будет быстро привязать к реальным данным.',
+                  'Настройте профиль под себя. Здесь можно обновлять ключевые блоки и постепенно собирать полноценную витрину.',
                   style: TextStyle(
                     fontSize: 15,
                     height: 1.45,
@@ -195,9 +198,16 @@ class ProfileShell extends StatelessWidget {
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(22),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
+                        onTap: () async {
+                          Navigator.of(sheetContext).pop();
+
+                          if (option.onTap != null) {
+                            await Future<void>.delayed(Duration.zero);
+                            await option.onTap!(pageContext);
+                            return;
+                          }
+
+                          ScaffoldMessenger.of(pageContext).showSnackBar(
                             SnackBar(
                               content: Text(
                                 'Раздел "${option.title}" готов к подключению редактирования.',
@@ -221,10 +231,7 @@ class ProfileShell extends StatelessWidget {
                                   color: accentColor.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: Icon(
-                                  option.icon,
-                                  color: accentColor,
-                                ),
+                                child: Icon(option.icon, color: accentColor),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -464,6 +471,7 @@ class _ProfileHeaderCard extends StatelessWidget {
   final String editButtonLabel;
   final Color accentColor;
   final Color secondaryAccentColor;
+  final Widget? avatar;
   final VoidCallback onEdit;
 
   const _ProfileHeaderCard({
@@ -475,14 +483,20 @@ class _ProfileHeaderCard extends StatelessWidget {
     required this.editButtonLabel,
     required this.accentColor,
     required this.secondaryAccentColor,
+    this.avatar,
     required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    final sportLabel = account.favoriteSport?.trim().isNotEmpty == true
-        ? account.favoriteSport!.trim()
-        : 'Спортивное направление';
+    final sportLabel = _normalizeValue(
+      account.favoriteSport,
+      'Спортивное направление',
+    );
+    final displayName = _normalizeValue(
+      account.name,
+      'Новый участник SportGuider',
+    );
 
     return Container(
       width: double.infinity,
@@ -568,22 +582,22 @@ class _ProfileHeaderCard extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/images/svg/profile-round.svg',
-                    width: 46,
-                    height: 46,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
+                  child:
+                      avatar ??
+                      SvgPicture.asset(
+                        'assets/images/svg/profile-round.svg',
+                        width: 46,
+                        height: 46,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                 ),
               ),
               const SizedBox(height: 18),
               Text(
-                account.name?.trim().isNotEmpty == true
-                    ? account.name!.trim()
-                    : 'Новый участник SportGuider',
+                displayName,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.philosopher(
                   fontSize: 32,
@@ -660,6 +674,19 @@ class _ProfileHeaderCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _normalizeValue(String? value, String fallback) {
+    if (value == null) {
+      return fallback;
+    }
+
+    final normalized = value.trim();
+    if (normalized.isEmpty || normalized.toLowerCase() == 'null') {
+      return fallback;
+    }
+
+    return normalized;
   }
 }
 
