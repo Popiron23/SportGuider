@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/domain/entities/location_entity.dart';
 import 'package:sportguider/presentation/colors.dart';
 
@@ -26,6 +27,11 @@ class ModalBodyView extends StatelessWidget {
           Text(
             '${location.latitude}, ${location.longitude}',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            location.sport.ru,
+            style: GoogleFonts.philosopher(fontSize: 16, color: Colors.grey),
           ),
         ],
       ),
