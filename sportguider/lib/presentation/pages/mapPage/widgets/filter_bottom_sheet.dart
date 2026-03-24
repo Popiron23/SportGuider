@@ -1,7 +1,10 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/core/enums/sport.dart';
+import 'package:sportguider/presentation/bloc/locations_bloc.dart';
 import 'package:sportguider/presentation/colors.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -66,9 +69,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
@@ -83,14 +87,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: null,
+                  onPressed: _applyFiltersLocation,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: AppColors.activeColor,
                   ),
                   child: Text(
                     'Применить',
                     style: GoogleFonts.philosopher(
-                      color: AppColors.activeColor,
+                      color: Colors.white,
+                      backgroundColor: AppColors.activeColor,
                       fontSize: 18,
                     ),
                   ),
@@ -149,7 +155,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           backgroundColor: Colors.grey[100],
           selectedColor: Colors.blue[100],
-          checkmarkColor: Colors.blue,
+          checkmarkColor: AppColors.activeColor,
         );
       },
     );
@@ -159,5 +165,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     setState(() {
       _selectedSportTypes = [];
     });
+  }
+
+  void _applyFiltersLocation() {
+    //context.read<LocationsBloc>().add(FilterSportTypesChanged(_selectedSportTypes));
+    Navigator.pop(context);
+  }
+
+  void _applyFiltersCoach() {
+    //context.read<LocationsBloc>().add(FilterSportTypesChanged(_selectedSportTypes));
+    Navigator.pop(context);
   }
 }
