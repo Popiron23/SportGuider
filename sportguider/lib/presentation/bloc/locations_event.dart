@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/domain/entities/location_entity.dart';
 
 abstract class LocationsEvent extends Equatable {
@@ -8,8 +9,15 @@ abstract class LocationsEvent extends Equatable {
 }
 
 class LocationsUpdateEvent extends LocationsEvent {
+  final List<Sport> sports;
+  const LocationsUpdateEvent(this.sports);
+  @override
+  List<Object> get props => [sports];
+}
+
+class LocationsFilterEvent extends LocationsEvent {
   final List<LocationEntity> locations;
-  const LocationsUpdateEvent(this.locations);
+  const LocationsFilterEvent(this.locations);
   @override
   List<Object> get props => [locations];
 }

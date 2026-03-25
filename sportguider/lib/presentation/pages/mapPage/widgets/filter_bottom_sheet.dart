@@ -1,24 +1,26 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/core/enums/sport.dart';
-import 'package:sportguider/presentation/bloc/locations_bloc.dart';
 import 'package:sportguider/presentation/colors.dart';
 
 class FilterBottomSheet extends StatefulWidget {
-  const FilterBottomSheet({Key? key}) : super(key: key);
+  final Function(List<Sport> selectedFilters) onApply;
+  final List<Sport> initialSportTypes;
+  const FilterBottomSheet({
+    super.key,
+    required this.onApply,
+    required this.initialSportTypes,
+  });
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  List<Sport> _selectedSportTypes = [];
-
+  late List<Sport> _selectedSportTypes;
   @override
   void initState() {
+    _selectedSportTypes = List.of(widget.initialSportTypes);
     super.initState();
   }
 
@@ -87,7 +89,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _applyFiltersLocation,
+                  onPressed: () => {
+                    widget.onApply(_selectedSportTypes),
+                    Navigator.pop(context),
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: AppColors.activeColor,
@@ -165,15 +170,5 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     setState(() {
       _selectedSportTypes = [];
     });
-  }
-
-  void _applyFiltersLocation() {
-    //context.read<LocationsBloc>().add(FilterSportTypesChanged(_selectedSportTypes));
-    Navigator.pop(context);
-  }
-
-  void _applyFiltersCoach() {
-    //context.read<LocationsBloc>().add(FilterSportTypesChanged(_selectedSportTypes));
-    Navigator.pop(context);
   }
 }
