@@ -795,6 +795,7 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
           _CoachEditorField(
             controller: _displayNameController,
             hintText: 'Например, Илья Смирнов / Coach Anna',
+            textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 20),
           const _CoachEditorLabel(title: 'Короткий слоган'),
@@ -993,7 +994,7 @@ class _CoachWorkFormatEditorSheetState
           const SizedBox(height: 10),
           _CoachEditorField(
             controller: _availabilityController,
-            hintText: 'Например, открыт к новым заявкам',
+            hintText: 'Например, открыт к новым заявкам по средам и пятницам',
             minLines: 2,
             maxLines: 3,
           ),
@@ -1124,6 +1125,7 @@ class _CoachEditorField extends StatelessWidget {
   final int minLines;
   final int maxLines;
   final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
 
   const _CoachEditorField({
     required this.controller,
@@ -1131,13 +1133,22 @@ class _CoachEditorField extends StatelessWidget {
     this.minLines = 1,
     this.maxLines = 1,
     this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedKeyboardType = keyboardType ?? TextInputType.multiline;
+    final resolvedTextCapitalization =
+        resolvedKeyboardType == TextInputType.emailAddress ||
+            resolvedKeyboardType == TextInputType.phone
+        ? TextCapitalization.none
+        : textCapitalization;
+
     return TextField(
       controller: controller,
-      keyboardType: keyboardType,
+      keyboardType: resolvedKeyboardType,
+      textCapitalization: resolvedTextCapitalization,
       minLines: minLines,
       maxLines: maxLines,
       style: TextStyle(

@@ -174,7 +174,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           title: 'Фото и имя',
           subtitle:
               'Обновить аватар, отображаемое имя и короткое описание.',
-          onTap: _openStableIdentityEditor,
+          onTap: _openIdentityEditor,
         ),
         ProfileEditOption(
           icon: Icons.contact_mail_outlined,
@@ -336,7 +336,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Future<void> _openStableIdentityEditor(BuildContext context) async {
+  Future<void> _openIdentityEditor(BuildContext context) async {
     final result = await showModalBottomSheet<_IdentityEditorResult>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -366,120 +366,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
       _avatarIndex = result.avatarIndex
           .clamp(0, _avatarOptions.length - 1)
           .toInt();
-    });
-
-    await _persistCustomization();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Фото, имя и описание обновлены')),
-      );
-    }
-  }
-
-  Future<void> _openIdentityEditor(BuildContext context) async {
-    final nameController = TextEditingController(text: _displayName);
-    final descriptionController = TextEditingController(
-      text: _shortDescription == _defaultDescription ? '' : _shortDescription,
-    );
-    var selectedAvatarIndex = _avatarIndex;
-
-    final result = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => _buildEditorSheet(
-          context: context,
-          title: 'Фото и имя',
-          subtitle:
-              'Выберите аватар, обновите отображаемое имя и добавьте короткое описание, которое будет видно в шапке профиля.',
-          saveLabel: 'Сохранить изменения',
-          onSave: () => Navigator.of(context).pop({
-            'displayName': nameController.text,
-            'shortDescription': descriptionController.text,
-            'avatarIndex': selectedAvatarIndex,
-          }),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildEditorLabel('Аватар'),
-              const SizedBox(height: 14),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: List.generate(_avatarOptions.length, (index) {
-                  final option = _avatarOptions[index];
-                  final isSelected = index == selectedAvatarIndex;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setModalState(() {
-                        selectedAvatarIndex = index;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: option.backgroundColor,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.activeColor
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Icon(
-                        option.icon,
-                        size: 32,
-                        color: option.iconColor,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 24),
-              _buildEditorLabel('Отображаемое имя'),
-              const SizedBox(height: 10),
-              _buildEditorField(
-                controller: nameController,
-                hintText: 'Например, Егор / Катя / Alex Runner',
-              ),
-              const SizedBox(height: 20),
-              _buildEditorLabel('Короткое описание'),
-              const SizedBox(height: 10),
-              _buildEditorField(
-                controller: descriptionController,
-                hintText:
-                    'Пара слов о себе, целях или любимом формате тренировок.',
-                minLines: 3,
-                maxLines: 4,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    nameController.dispose();
-    descriptionController.dispose();
-
-    if (result == null) {
-      return;
-    }
-
-    setState(() {
-      _displayName = _displayValue(
-        result['displayName'] as String?,
-        _fallbackName(widget.account.name),
-      );
-      _shortDescription = _displayValue(
-        result['shortDescription'] as String?,
-        _defaultDescription,
-      );
-      _avatarIndex = (result['avatarIndex'] as int?) ?? _avatarIndex;
     });
 
     await _persistCustomization();
@@ -588,146 +474,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
         shape: BoxShape.circle,
       ),
       child: Icon(option.icon, size: 30, color: option.iconColor),
-    );
-  }
-
-  Widget _buildEditorSheet({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required String saveLabel,
-    required VoidCallback onSave,
-    required Widget child,
-  }) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return FractionallySizedBox(
-      heightFactor: 0.86,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20, 14, 20, 24 + bottomInset),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 52,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: AppColors.borderColor,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  title,
-                  style: GoogleFonts.philosopher(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.45,
-                    color: AppColors.textSecondaryColor,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                child,
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-                      onSave();
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.activeColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    child: Text(
-                      saveLabel,
-                      style: GoogleFonts.philosopher(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditorLabel(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.philosopher(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimaryColor,
-      ),
-    );
-  }
-
-  Widget _buildEditorField({
-    required TextEditingController controller,
-    required String hintText,
-    int minLines = 1,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      minLines: minLines,
-      maxLines: maxLines,
-      style: TextStyle(
-        fontSize: 16,
-        color: AppColors.textPrimaryColor,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(color: AppColors.textSecondaryColor),
-        filled: true,
-        fillColor: AppColors.backgroundColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: AppColors.borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: AppColors.borderColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: AppColors.activeColor, width: 1.5),
-        ),
-      ),
     );
   }
 
@@ -909,7 +655,8 @@ class _IdentityEditorSheetState extends State<_IdentityEditorSheet> {
           const SizedBox(height: 10),
           _StableEditorField(
             controller: _displayNameController,
-            hintText: 'Например, Егор / Катя / Alex Runner',
+            hintText: 'Например, Егор / Alex Runner',
+            textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 20),
           const _StableEditorLabel(title: 'Короткое описание'),
@@ -1247,6 +994,7 @@ class _StableEditorField extends StatelessWidget {
   final int minLines;
   final int maxLines;
   final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
 
   const _StableEditorField({
     required this.controller,
@@ -1254,13 +1002,22 @@ class _StableEditorField extends StatelessWidget {
     this.minLines = 1,
     this.maxLines = 1,
     this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedKeyboardType = keyboardType ?? TextInputType.multiline;
+    final resolvedTextCapitalization =
+        resolvedKeyboardType == TextInputType.emailAddress ||
+            resolvedKeyboardType == TextInputType.phone
+        ? TextCapitalization.none
+        : textCapitalization;
+
     return TextField(
       controller: controller,
-      keyboardType: keyboardType,
+      keyboardType: resolvedKeyboardType,
+      textCapitalization: resolvedTextCapitalization,
       minLines: minLines,
       maxLines: maxLines,
       style: TextStyle(
