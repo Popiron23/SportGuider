@@ -29,7 +29,7 @@ class LocationEntity extends Equatable {
       longitude: (data['longitude'] as double),
       name: (data['name'] as String),
       sport: Sport.values.firstWhere(
-        (e) => e.toString() == 'Sport.' + (data['sport'] as String),
+        (e) => e.toString() == 'Sport.${data['sport'] as String}',
       ),
     );
   }

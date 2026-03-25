@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/domain/entities/location_entity.dart';
 
 class LocationsRepository {
@@ -6,28 +7,20 @@ class LocationsRepository {
     'places',
   );
 
-  Stream<List<LocationEntity>> getLocationsStream() {
-    return _locationsRef.onValue.map((event) {
-      final snapshot = event.snapshot;
+  Future<List<LocationEntity>> getLocations(List<Sport> sports) async {
+    final snapshot = await _locationsRef.get();
 
-      if (snapshot.value == null) {
-        return <LocationEntity>[];
-      }
+    if (snapshot.value == null) {
+      return <LocationEntity>[];
+    }
 
-      final locationsData = Map<String, dynamic>.from(snapshot.value as Map);
-      final List<LocationEntity> locations = [];
+    final locationsData = Map<String, dynamic>.from(snapshot.value as Map);
 
-      locationsData.forEach((key, value) {
-        try {
-          final location = LocationEntity.fromFirebase(value);
-          locations.add(location);
-        } catch (e) {
-          print('Error parsing location $key: $e');
-        }
-      });
-
-      return locations;
-    });
+    final List<LocationEntity> locations = locationsData.values
+        .map((e) => LocationEntity.fromFirebase(e))
+        .where((e) => sports.contains(e.sport))
+        .toList();
+    return locations;
   }
 
   Future<void> addlocation(LocationEntity location) async {
