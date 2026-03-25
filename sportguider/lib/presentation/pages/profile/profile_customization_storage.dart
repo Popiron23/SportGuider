@@ -54,9 +54,43 @@ class UserProfileCustomization {
   }
 }
 
+class CoachProfileCustomization {
+  final String? displayName;
+  final String? headline;
+  final String? description;
+  final int? avatarIndex;
+
+  const CoachProfileCustomization({
+    this.displayName,
+    this.headline,
+    this.description,
+    this.avatarIndex,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'displayName': displayName,
+      'headline': headline,
+      'description': description,
+      'avatarIndex': avatarIndex,
+    };
+  }
+
+  factory CoachProfileCustomization.fromJson(Map<String, dynamic> json) {
+    return CoachProfileCustomization(
+      displayName: json['displayName'] as String?,
+      headline: json['headline'] as String?,
+      description: json['description'] as String?,
+      avatarIndex: json['avatarIndex'] as int?,
+    );
+  }
+}
+
 class ProfileCustomizationStorage {
   static String _userProfileKey(String accountId) =>
       'user_profile_customization_$accountId';
+  static String _coachProfileKey(String accountId) =>
+      'coach_profile_customization_$accountId';
 
   static Future<UserProfileCustomization> readUserCustomization(
     String accountId,
@@ -87,6 +121,39 @@ class ProfileCustomizationStorage {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(
       _userProfileKey(accountId),
+      jsonEncode(customization.toJson()),
+    );
+  }
+
+  static Future<CoachProfileCustomization> readCoachCustomization(
+    String accountId,
+  ) async {
+    final preferences = await SharedPreferences.getInstance();
+    final rawJson = preferences.getString(_coachProfileKey(accountId));
+
+    if (rawJson == null || rawJson.isEmpty) {
+      return const CoachProfileCustomization();
+    }
+
+    try {
+      final decoded = jsonDecode(rawJson);
+      if (decoded is! Map<String, dynamic>) {
+        return const CoachProfileCustomization();
+      }
+
+      return CoachProfileCustomization.fromJson(decoded);
+    } catch (_) {
+      return const CoachProfileCustomization();
+    }
+  }
+
+  static Future<void> saveCoachCustomization({
+    required String accountId,
+    required CoachProfileCustomization customization,
+  }) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(
+      _coachProfileKey(accountId),
       jsonEncode(customization.toJson()),
     );
   }
