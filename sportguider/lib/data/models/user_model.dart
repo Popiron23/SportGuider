@@ -20,7 +20,6 @@ class UserModel extends Equatable {
     this.createdAt,
   });
 
-  // Пустой пользователь (для начального состояния)
   static const empty = UserModel(id: '');
 
   // Проверка, является ли пользователь авторизованным
@@ -29,7 +28,6 @@ class UserModel extends Equatable {
   // Проверка, является ли пользователь пустым (неавторизованным)
   bool get isEmpty => this == UserModel.empty;
 
-  // Метод для Equatable - определяет, какие поля сравнивать
   @override
   List<Object?> get props => [id, email, name];
 
@@ -57,7 +55,6 @@ class UserModel extends Equatable {
     };
   }
 
-  // Создание User из FirebaseUser
   factory UserModel.fromFirebaseUser(User firebaseUser) {
     return UserModel(
       id: firebaseUser.uid,

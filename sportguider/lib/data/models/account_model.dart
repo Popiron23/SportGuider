@@ -7,7 +7,7 @@ class AccountModel extends Equatable {
   final String? name;
   final String? email;
   final String? phoneNumber;
-  final Role? role; // например: user, coach
+  final Role? role;
   final String? favoriteSport;
   final List<String> coaches;
 
@@ -21,13 +21,10 @@ class AccountModel extends Equatable {
     this.coaches = const [],
   });
 
-  // Пустой аккаунт (для начального состояния)
   static const empty = AccountModel(id: '');
 
-  // Метод для Equatable - определяет, какие поля сравнивать
   @override
   List<Object?> get props => [id, email];
-  // Создание User из FirebaseUser
   factory AccountModel.fromFirebaseUser(User? firebaseUser) {
     return AccountModel(
       id: firebaseUser!.uid,

@@ -1,15 +1,16 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
+import 'package:sportguider/presentation/colors.dart';
+import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
+import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
-import 'package:sportguider/presentation/colors.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/presentation/pages/profile/profile_role_storage.dart';
 import 'package:sportguider/presentation/widgets/back_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -25,14 +26,42 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   late final TextEditingController usernameController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+  int _selectedRoleIndex = 1;
+
+  Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openProfile(AccountEntity account) async {
+    await ProfileRoleStorage.saveRole(_selectedRole);
+
+    if (!mounted) {
+      return;
+    }
+
+    if (_selectedRole == Role.coach) {
+      context.router.replace(CoachProfileRoute(account: account));
+      return;
+    }
+
+    context.router.replace(UserProfileRoute(account: account));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButtonReg(), backgroundColor: Colors.white),
+      appBar: AppBar(
+        leading: const BackButtonReg(),
+        backgroundColor: Colors.white,
+      ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.only(left: 60, right: 60),
+        padding: const EdgeInsets.symmetric(horizontal: 60),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -44,8 +73,7 @@ class _AuthPageState extends State<AuthPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Отступ между виджетом "Логин" и текстом "Регистрация"
-            SizedBox(height: 60),
+            const SizedBox(height: 60),
             Text(
               'Логин',
               style: GoogleFonts.philosopher(
@@ -54,14 +82,12 @@ class _AuthPageState extends State<AuthPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Виджет-логин
-            Container(
+            SizedBox(
               width: 320,
               height: 35,
               child: UsernameInputField(controller: usernameController),
             ),
-            //Отступ между виджетом "Пароль" и виджетом "Логин"
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Text(
               'Пароль',
               style: GoogleFonts.philosopher(
@@ -70,19 +96,15 @@ class _AuthPageState extends State<AuthPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Виджет-пароль
-            Container(
+            SizedBox(
               width: 320,
               height: 35,
               child: PasswordInputField(controller: passwordController),
             ),
-
-            //Отступ между виджетом "Пароль" и виджетом "Зарегистрироваться"
-            SizedBox(height: 30),
-            // Here, default theme colors are used for activeBgColor, activeFgColor, inactiveBgColor and inactiveFgColor
+            const SizedBox(height: 30),
             ToggleSwitch(
               minWidth: 200,
-              initialLabelIndex: 0,
+              initialLabelIndex: _selectedRoleIndex,
               totalSwitches: 2,
               activeFgColor: Colors.white,
               inactiveBgColor: Colors.white,
@@ -91,14 +113,15 @@ class _AuthPageState extends State<AuthPage> {
                 AppColors.activeColor,
                 AppColors.activeColor,
               ],
-              labels: ['Тренер', 'Спортсмен'],
+              labels: const ['Тренер', 'Спортсмен'],
               onToggle: (index) {
-                print('switched to: $index');
+                setState(() {
+                  _selectedRoleIndex = index ?? 1;
+                });
               },
             ),
-            SizedBox(height: 30),
-            //Виджет-зарегистрироваться
-            Container(
+            const SizedBox(height: 30),
+            SizedBox(
               width: 320,
               height: 35,
               child: AuthButton(
@@ -106,48 +129,49 @@ class _AuthPageState extends State<AuthPage> {
                 onPressed: () async {
                   final email = usernameController.text;
                   final password = passwordController.text;
-                  var _errorMes = null;
+                  String? errorMessage;
+
                   if (email == 'admin' && password == 'admin') {
-                    context.router.replace(
-                      UserProfileRoute(
-                        account: AccountEntity(
-                          id: '1',
-                          name: 'Иванов Иван',
-                          email: 'example@mail.com',
-                          phoneNumber: '+7900123123',
-                          favoriteSport: 'Баскетбол',
-                          coaches: ['Петров Петр Петрович'],
-                        ),
+                    await _openProfile(
+                      AccountEntity(
+                        id: '1',
+                        name: 'Иванов Иван',
+                        email: 'example@mail.com',
+                        phoneNumber: '+7900123123',
+                        role: _selectedRole,
+                        favoriteSport: 'Баскетбол',
+                        coaches: const ['Петров Петр Петрович'],
                       ),
                     );
-                  } else {
-                    final result = await FirebaseService.onLogin(
-                      email: email,
-                      password: password,
-                    );
-                    if (result!.isSuccess) {
-                      context.router.replace(
-                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
-                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
-                        UserProfileRoute(
-                          account: AccountEntity.fromModel(
-                            AccountModel.fromFirebaseUser(
-                              result!.credential!.user,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      _errorMes = result.errorMes;
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
-                    }
+                    return;
                   }
+
+                  final result = await FirebaseService.onLogin(
+                    email: email,
+                    password: password,
+                  );
+
+                  if (result != null && result.isSuccess) {
+                    await _openProfile(
+                      AccountEntity.fromModel(
+                        AccountModel.fromFirebaseUser(result.credential!.user),
+                      ).copyWith(role: _selectedRole),
+                    );
+                    return;
+                  }
+
+                  errorMessage = result?.errorMes;
+                  if (!mounted) {
+                    return;
+                  }
+
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(errorMessage ?? 'Ошибка входа')));
                 },
               ),
             ),
-            TextRegButton(),
+            const TextRegButton(),
           ],
         ),
       ),

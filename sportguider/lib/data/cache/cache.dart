@@ -1,17 +1,12 @@
-// CacheClient - это обертка для работы с локальным хранилищем
-// В данном случае используем shared_preferences
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheClient {
-  // Экземпляр SharedPreferences
   final SharedPreferences _sharedPreferences;
 
-  // Конструктор
   CacheClient({required SharedPreferences sharedPreferences})
     : _sharedPreferences = sharedPreferences;
 
-  // Метод для записи данных
-  // T - generic тип (обобщенный тип), позволяет работать с разными типами данных
+  
   Future<void> write<T>({required String key, required T value}) async {
     if (value is String) {
       await _sharedPreferences.setString(key, value);
@@ -28,13 +23,10 @@ class CacheClient {
     }
   }
 
-  // Метод для чтения данных
   T? read<T>({required String key}) {
-    // dynamic - специальный тип, который отключает проверку типов на время компиляции
-    // Используется когда тип заранее неизвестен
+    
     dynamic value;
 
-    // Проверяем, какой тип данных нужно прочитать
     if (T == String) {
       value = _sharedPreferences.getString(key);
     } else if (T == int) {

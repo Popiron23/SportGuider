@@ -158,9 +158,7 @@ class AuthenticationRepository {
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
-  // Контроллер для потока пользователей
   final StreamController<UserModel> _userController =
-      // Используем broadcast, чтобы можно было подписаться на поток из нескольких мест
       StreamController<UserModel>.broadcast();
 
   AuthenticationRepository({
@@ -175,19 +173,14 @@ class AuthenticationRepository {
              sharedPreferences:
                  SharedPreferences.getInstance() as SharedPreferences,
            ) {
-    // Инициализация: подписываемся на изменения состояния аутентификации Firebase
     _firebaseAuth.authStateChanges().listen((firebaseUser) {
       if (firebaseUser != null) {
-        // Преобразуем FirebaseUser в нашу модель User
         final user = UserModel.fromFirebaseUser(firebaseUser);
 
-        // Сохраняем в кэш
         _cache.write(key: _userCacheKey, value: user.toJson());
 
-        // Отправляем в поток
         _userController.add(user);
       } else {
-        // Пользователь вышел
         _cache.delete(key: _userCacheKey);
         _userController.add(UserModel.empty);
       }
