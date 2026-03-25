@@ -59,12 +59,24 @@ class CoachProfileCustomization {
   final String? headline;
   final String? description;
   final int? avatarIndex;
+  final String? specialization;
+  final String? sportsAccents;
+  final String? achievements;
+  final String? workFormat;
+  final String? workMode;
+  final String? availability;
 
   const CoachProfileCustomization({
     this.displayName,
     this.headline,
     this.description,
     this.avatarIndex,
+    this.specialization,
+    this.sportsAccents,
+    this.achievements,
+    this.workFormat,
+    this.workMode,
+    this.availability,
   });
 
   Map<String, dynamic> toJson() {
@@ -73,6 +85,12 @@ class CoachProfileCustomization {
       'headline': headline,
       'description': description,
       'avatarIndex': avatarIndex,
+      'specialization': specialization,
+      'sportsAccents': sportsAccents,
+      'achievements': achievements,
+      'workFormat': workFormat,
+      'workMode': workMode,
+      'availability': availability,
     };
   }
 
@@ -82,6 +100,12 @@ class CoachProfileCustomization {
       headline: json['headline'] as String?,
       description: json['description'] as String?,
       avatarIndex: json['avatarIndex'] as int?,
+      specialization: json['specialization'] as String?,
+      sportsAccents: json['sportsAccents'] as String?,
+      achievements: json['achievements'] as String?,
+      workFormat: json['workFormat'] as String?,
+      workMode: json['workMode'] as String?,
+      availability: json['availability'] as String?,
     );
   }
 }

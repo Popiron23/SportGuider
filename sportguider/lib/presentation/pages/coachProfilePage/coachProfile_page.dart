@@ -24,6 +24,13 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       'Витрина тренера с акцентом на экспертизу, формат работы и доверие.';
   static const _defaultDescription =
       'Этот экран выглядит более статусно: он продаёт специалиста, помогает ученику быстро понять сильные стороны и подводит к записи.';
+  static const _defaultSportsAccents =
+      'Техника движения, контроль нагрузки и уверенный прогресс.';
+  static const _defaultAchievements =
+      'Опыт работы с новичками и спортсменами, которым важна системность.';
+  static const _defaultWorkFormat = 'Индивидуально и мини-группы';
+  static const _defaultWorkMode = 'Онлайн и офлайн';
+  static const _defaultAvailability = 'Открыт к новым заявкам';
 
   static const List<_CoachAvatarOption> _avatarOptions = [
     _CoachAvatarOption(
@@ -61,6 +68,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   late String _displayName;
   late String _headline;
   late String _description;
+  late String _specialization;
+  late String _sportsAccents;
+  late String _achievements;
+  late String _workFormat;
+  late String _workMode;
+  late String _availability;
   int _avatarIndex = 0;
 
   @override
@@ -69,6 +82,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     _displayName = _fallbackName(widget.account.name);
     _headline = _defaultHeadline;
     _description = _defaultDescription;
+    _specialization = _specializationFallback(widget.account.favoriteSport);
+    _sportsAccents = _defaultSportsAccents;
+    _achievements = _defaultAchievements;
+    _workFormat = _defaultWorkFormat;
+    _workMode = _defaultWorkMode;
+    _availability = _defaultAvailability;
     _loadCustomization();
   }
 
@@ -102,18 +121,67 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
             .clamp(0, _avatarOptions.length - 1)
             .toInt();
       }
+      if (customization.specialization != null) {
+        _specialization = _displayValue(
+          customization.specialization!,
+          _specializationFallback(widget.account.favoriteSport),
+        );
+      }
+      if (customization.sportsAccents != null) {
+        _sportsAccents = _displayValue(
+          customization.sportsAccents!,
+          _defaultSportsAccents,
+        );
+      }
+      if (customization.achievements != null) {
+        _achievements = _displayValue(
+          customization.achievements!,
+          _defaultAchievements,
+        );
+      }
+      if (customization.workFormat != null) {
+        _workFormat = _displayValue(
+          customization.workFormat!,
+          _defaultWorkFormat,
+        );
+      }
+      if (customization.workMode != null) {
+        _workMode = _displayValue(
+          customization.workMode!,
+          _defaultWorkMode,
+        );
+      }
+      if (customization.availability != null) {
+        _availability = _displayValue(
+          customization.availability!,
+          _defaultAvailability,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final specialization = _displayValue(
-      widget.account.favoriteSport,
-      'Функциональная подготовка',
+      _specialization,
+      _specializationFallback(widget.account.favoriteSport),
+    );
+    final sportsAccents = _displayValue(_sportsAccents, _defaultSportsAccents);
+    final achievements = _displayValue(_achievements, _defaultAchievements);
+    final workFormat = _displayValue(_workFormat, _defaultWorkFormat);
+    final workMode = _displayValue(_workMode, _defaultWorkMode);
+    final availability = _displayValue(_availability, _defaultAvailability);
+    final specializationTags = _buildSpecializationTags(
+      specialization: specialization,
+      sportsAccents: sportsAccents,
+      achievements: achievements,
     );
 
     return ProfileShell(
-      account: widget.account.copyWith(name: _displayName),
+      account: widget.account.copyWith(
+        name: _displayName,
+        favoriteSport: specialization,
+      ),
       roleLabel: 'ПРОФИЛЬ ТРЕНЕРА',
       headline: _displayValue(_headline, _defaultHeadline),
       description: _displayValue(_description, _defaultDescription),
@@ -139,7 +207,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         ProfileMetric(
           icon: Icons.calendar_month_rounded,
           label: 'Формат',
-          value: 'Инд. / группы',
+          value: workFormat,
           accentColor: AppColors.warningColor,
         ),
       ],
@@ -151,17 +219,19 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
               'Фото, имя, короткий слоган и первое впечатление на экране.',
           onTap: _openShowcaseEditor,
         ),
-        const ProfileEditOption(
+        ProfileEditOption(
           icon: Icons.military_tech_outlined,
           title: 'Специализация',
           subtitle:
               'Направления подготовки, спортивные акценты и достижения.',
+          onTap: _openSpecializationEditor,
         ),
-        const ProfileEditOption(
+        ProfileEditOption(
           icon: Icons.schedule_outlined,
           title: 'Формат работы',
           subtitle:
               'Индивидуально, группы, онлайн, офлайн и доступность для записи.',
+          onTap: _openWorkFormatEditor,
         ),
       ],
       sections: [
@@ -185,6 +255,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
               ),
               const SizedBox(height: 18),
               ProfileInfoRow(
+                icon: Icons.groups_rounded,
+                label: 'Формат занятий',
+                value: workFormat,
+              ),
+              const SizedBox(height: 18),
+              ProfileInfoRow(
                 icon: Icons.mail_outline_rounded,
                 label: 'Контакт для записи',
                 value: _displayValue(
@@ -196,28 +272,62 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           ),
         ),
         ProfileSectionCard(
-          title: 'Сильные стороны',
+          title: 'Специализация',
           subtitle:
-              'Здесь хорошо смотрятся короткие компетенции, которые помогают ученику быстро принять решение.',
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
+              'Здесь собраны направления подготовки, спортивные акценты и достижения, которые формируют образ тренера.',
+          child: Column(
             children: [
-              ProfileTag(
-                text: specialization,
-                color: const Color(0xFF2F71F7),
+              ProfileInfoRow(
+                icon: Icons.tune_rounded,
+                label: 'Спортивные акценты',
+                value: sportsAccents,
               ),
-              ProfileTag(
-                text: 'Персональный план',
-                color: AppColors.successColor,
+              const SizedBox(height: 18),
+              ProfileInfoRow(
+                icon: Icons.emoji_events_outlined,
+                label: 'Достижения',
+                value: achievements,
               ),
-              ProfileTag(
-                text: 'Техника и контроль',
-                color: AppColors.warningColor,
+              const SizedBox(height: 18),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: specializationTags
+                    .map(
+                      (tag) => ProfileTag(
+                        text: tag,
+                        color: tag == specialization
+                            ? const Color(0xFF2F71F7)
+                            : AppColors.successColor,
+                      ),
+                    )
+                    .toList(),
               ),
-              ProfileTag(
-                text: 'Поддержка новичков',
-                color: AppColors.dangerColor,
+            ],
+          ),
+        ),
+        ProfileSectionCard(
+          title: 'Формат работы',
+          subtitle:
+              'Блок помогает быстро понять, как проходят занятия и насколько легко записаться на тренировку.',
+          child: Column(
+            children: [
+              ProfileInfoRow(
+                icon: Icons.calendar_month_rounded,
+                label: 'Формат занятий',
+                value: workFormat,
+              ),
+              const SizedBox(height: 18),
+              ProfileInfoRow(
+                icon: Icons.laptop_mac_rounded,
+                label: 'Онлайн / офлайн',
+                value: workMode,
+              ),
+              const SizedBox(height: 18),
+              ProfileInfoRow(
+                icon: Icons.event_available_rounded,
+                label: 'Доступность для записи',
+                value: availability,
               ),
             ],
           ),
@@ -293,7 +403,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           .toInt();
     });
 
-    await _persistShowcaseCustomization();
+    await _persistCoachCustomization();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Витрина тренера обновлена')),
@@ -301,7 +411,83 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     }
   }
 
-  Future<void> _persistShowcaseCustomization() async {
+  Future<void> _openSpecializationEditor(BuildContext context) async {
+    final result = await showModalBottomSheet<_CoachSpecializationEditorResult>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _CoachSpecializationEditorSheet(
+        initialSpecialization: _specialization,
+        initialSportsAccents:
+            _sportsAccents == _defaultSportsAccents ? '' : _sportsAccents,
+        initialAchievements:
+            _achievements == _defaultAchievements ? '' : _achievements,
+      ),
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    setState(() {
+      _specialization = _displayValue(
+        result.specialization,
+        _specializationFallback(widget.account.favoriteSport),
+      );
+      _sportsAccents = _displayValue(
+        result.sportsAccents,
+        _defaultSportsAccents,
+      );
+      _achievements = _displayValue(
+        result.achievements,
+        _defaultAchievements,
+      );
+    });
+
+    await _persistCoachCustomization();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Специализация обновлена')),
+      );
+    }
+  }
+
+  Future<void> _openWorkFormatEditor(BuildContext context) async {
+    final result = await showModalBottomSheet<_CoachWorkFormatEditorResult>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _CoachWorkFormatEditorSheet(
+        initialWorkFormat:
+            _workFormat == _defaultWorkFormat ? '' : _workFormat,
+        initialWorkMode: _workMode == _defaultWorkMode ? '' : _workMode,
+        initialAvailability:
+            _availability == _defaultAvailability ? '' : _availability,
+      ),
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    setState(() {
+      _workFormat = _displayValue(result.workFormat, _defaultWorkFormat);
+      _workMode = _displayValue(result.workMode, _defaultWorkMode);
+      _availability = _displayValue(
+        result.availability,
+        _defaultAvailability,
+      );
+    });
+
+    await _persistCoachCustomization();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Формат работы обновлён')),
+      );
+    }
+  }
+
+  Future<void> _persistCoachCustomization() async {
     await ProfileCustomizationStorage.saveCoachCustomization(
       accountId: widget.account.id,
       customization: CoachProfileCustomization(
@@ -309,6 +495,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         headline: _headline.trim(),
         description: _description.trim(),
         avatarIndex: _avatarIndex,
+        specialization: _specialization.trim(),
+        sportsAccents: _sportsAccents.trim(),
+        achievements: _achievements.trim(),
+        workFormat: _workFormat.trim(),
+        workMode: _workMode.trim(),
+        availability: _availability.trim(),
       ),
     );
   }
@@ -329,6 +521,44 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
 
   static String _fallbackName(String? rawName) {
     return _displayValue(rawName, 'Новый тренер SportGuider');
+  }
+
+  static String _specializationFallback(String? rawValue) {
+    return _displayValue(rawValue, 'Функциональная подготовка');
+  }
+
+  static List<String> _buildSpecializationTags({
+    required String specialization,
+    required String sportsAccents,
+    required String achievements,
+  }) {
+    final tags = <String>[
+      specialization,
+      ..._extractTagParts(sportsAccents),
+      ..._extractTagParts(achievements),
+    ];
+
+    final uniqueTags = <String>[];
+    for (final tag in tags) {
+      if (tag.isEmpty || uniqueTags.contains(tag)) {
+        continue;
+      }
+
+      uniqueTags.add(tag);
+      if (uniqueTags.length == 4) {
+        break;
+      }
+    }
+
+    return uniqueTags;
+  }
+
+  static List<String> _extractTagParts(String value) {
+    return value
+        .split(RegExp(r'[,/;\n]+'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty && part.length <= 28)
+        .toList();
   }
 
   static String _displayValue(String? value, String fallback) {
@@ -427,6 +657,30 @@ class _CoachShowcaseEditorResult {
     required this.headline,
     required this.description,
     required this.avatarIndex,
+  });
+}
+
+class _CoachSpecializationEditorResult {
+  final String specialization;
+  final String sportsAccents;
+  final String achievements;
+
+  const _CoachSpecializationEditorResult({
+    required this.specialization,
+    required this.sportsAccents,
+    required this.achievements,
+  });
+}
+
+class _CoachWorkFormatEditorResult {
+  final String workFormat;
+  final String workMode;
+  final String availability;
+
+  const _CoachWorkFormatEditorResult({
+    required this.workFormat,
+    required this.workMode,
+    required this.availability,
   });
 }
 
@@ -560,6 +814,188 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
                 'Коротко опишите подход, стиль работы и ощущение от занятий с вами.',
             minLines: 3,
             maxLines: 4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoachSpecializationEditorSheet extends StatefulWidget {
+  final String initialSpecialization;
+  final String initialSportsAccents;
+  final String initialAchievements;
+
+  const _CoachSpecializationEditorSheet({
+    required this.initialSpecialization,
+    required this.initialSportsAccents,
+    required this.initialAchievements,
+  });
+
+  @override
+  State<_CoachSpecializationEditorSheet> createState() =>
+      _CoachSpecializationEditorSheetState();
+}
+
+class _CoachSpecializationEditorSheetState
+    extends State<_CoachSpecializationEditorSheet> {
+  late final TextEditingController _specializationController;
+  late final TextEditingController _sportsAccentsController;
+  late final TextEditingController _achievementsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _specializationController = TextEditingController(
+      text: widget.initialSpecialization,
+    );
+    _sportsAccentsController = TextEditingController(
+      text: widget.initialSportsAccents,
+    );
+    _achievementsController = TextEditingController(
+      text: widget.initialAchievements,
+    );
+  }
+
+  @override
+  void dispose() {
+    _specializationController.dispose();
+    _sportsAccentsController.dispose();
+    _achievementsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _CoachEditorSheet(
+      title: 'Специализация',
+      subtitle:
+          'Заполните направление подготовки, спортивные акценты и достижения, чтобы профиль тренера выглядел убедительнее.',
+      saveLabel: 'Сохранить специализацию',
+      onSave: () {
+        Navigator.of(context).pop(
+          _CoachSpecializationEditorResult(
+            specialization: _specializationController.text,
+            sportsAccents: _sportsAccentsController.text,
+            achievements: _achievementsController.text,
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _CoachEditorLabel(title: 'Основное направление'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _specializationController,
+            hintText: 'Например, функциональная подготовка / бег / ОФП',
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Спортивные акценты'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _sportsAccentsController,
+            hintText: 'Какие сильные стороны и акценты вы хотите показать?',
+            minLines: 3,
+            maxLines: 4,
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Достижения'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _achievementsController,
+            hintText: 'Кратко опишите опыт, результаты или достижения.',
+            minLines: 3,
+            maxLines: 4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoachWorkFormatEditorSheet extends StatefulWidget {
+  final String initialWorkFormat;
+  final String initialWorkMode;
+  final String initialAvailability;
+
+  const _CoachWorkFormatEditorSheet({
+    required this.initialWorkFormat,
+    required this.initialWorkMode,
+    required this.initialAvailability,
+  });
+
+  @override
+  State<_CoachWorkFormatEditorSheet> createState() =>
+      _CoachWorkFormatEditorSheetState();
+}
+
+class _CoachWorkFormatEditorSheetState
+    extends State<_CoachWorkFormatEditorSheet> {
+  late final TextEditingController _workFormatController;
+  late final TextEditingController _workModeController;
+  late final TextEditingController _availabilityController;
+
+  @override
+  void initState() {
+    super.initState();
+    _workFormatController = TextEditingController(
+      text: widget.initialWorkFormat,
+    );
+    _workModeController = TextEditingController(text: widget.initialWorkMode);
+    _availabilityController = TextEditingController(
+      text: widget.initialAvailability,
+    );
+  }
+
+  @override
+  void dispose() {
+    _workFormatController.dispose();
+    _workModeController.dispose();
+    _availabilityController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _CoachEditorSheet(
+      title: 'Формат работы',
+      subtitle:
+          'Укажите, как проходят занятия, доступны ли онлайн-сессии и насколько легко записаться к вам.',
+      saveLabel: 'Сохранить формат',
+      onSave: () {
+        Navigator.of(context).pop(
+          _CoachWorkFormatEditorResult(
+            workFormat: _workFormatController.text,
+            workMode: _workModeController.text,
+            availability: _availabilityController.text,
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _CoachEditorLabel(title: 'Формат занятий'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _workFormatController,
+            hintText: 'Например, индивидуально, мини-группы',
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Онлайн / офлайн'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _workModeController,
+            hintText: 'Например, онлайн и офлайн / только офлайн',
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Доступность для записи'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _availabilityController,
+            hintText: 'Например, открыт к новым заявкам',
+            minLines: 2,
+            maxLines: 3,
           ),
         ],
       ),
