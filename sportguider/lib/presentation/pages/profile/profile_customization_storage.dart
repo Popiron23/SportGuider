@@ -65,6 +65,10 @@ class CoachProfileCustomization {
   final String? workFormat;
   final String? workMode;
   final String? availability;
+  final String? organizationName;
+  final String? organizationSport;
+  final String? organizationAddress;
+  final String? organizationDescription;
 
   const CoachProfileCustomization({
     this.displayName,
@@ -77,6 +81,10 @@ class CoachProfileCustomization {
     this.workFormat,
     this.workMode,
     this.availability,
+    this.organizationName,
+    this.organizationSport,
+    this.organizationAddress,
+    this.organizationDescription,
   });
 
   Map<String, dynamic> toJson() {
@@ -91,6 +99,10 @@ class CoachProfileCustomization {
       'workFormat': workFormat,
       'workMode': workMode,
       'availability': availability,
+      'organizationName': organizationName,
+      'organizationSport': organizationSport,
+      'organizationAddress': organizationAddress,
+      'organizationDescription': organizationDescription,
     };
   }
 
@@ -106,6 +118,10 @@ class CoachProfileCustomization {
       workFormat: json['workFormat'] as String?,
       workMode: json['workMode'] as String?,
       availability: json['availability'] as String?,
+      organizationName: json['organizationName'] as String?,
+      organizationSport: json['organizationSport'] as String?,
+      organizationAddress: json['organizationAddress'] as String?,
+      organizationDescription: json['organizationDescription'] as String?,
     );
   }
 }

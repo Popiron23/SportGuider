@@ -31,6 +31,35 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   static const _defaultWorkFormat = 'Индивидуально и мини-группы';
   static const _defaultWorkMode = 'Онлайн и офлайн';
   static const _defaultAvailability = 'Открыт к новым заявкам';
+  static const _defaultOrganizationSport = 'Функциональная подготовка';
+  static const _defaultOrganizationAddress =
+      'Адрес организации появится здесь';
+  static const _defaultOrganizationDescription =
+      'Точка на карте, к которой прикреплён тренер, будет отображаться в этом блоке.';
+
+  static const List<_CoachOrganization> _presetOrganizations = [
+    _CoachOrganization(
+      name: 'Arena North',
+      sport: 'Функциональная подготовка',
+      address: 'Москва, Ленинградский проспект, 36',
+      description:
+          'Современный зал для персональных тренировок, ОФП и работы с техникой движения.',
+    ),
+    _CoachOrganization(
+      name: 'RunLab City',
+      sport: 'Бег и выносливость',
+      address: 'Москва, Лужнецкая набережная, 24',
+      description:
+          'Локация для беговой подготовки, тестов выносливости и групповых сессий на открытом воздухе.',
+    ),
+    _CoachOrganization(
+      name: 'Balance Studio',
+      sport: 'Йога и мобильность',
+      address: 'Москва, улица Покровка, 17с1',
+      description:
+          'Студия с акцентом на мобильность, восстановление и аккуратную персональную работу.',
+    ),
+  ];
 
   static const List<_CoachAvatarOption> _avatarOptions = [
     _CoachAvatarOption(
@@ -74,11 +103,14 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   late String _workFormat;
   late String _workMode;
   late String _availability;
+  late final List<_CoachOrganization> _organizations;
+  _CoachOrganization? _selectedOrganization;
   int _avatarIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _organizations = List<_CoachOrganization>.from(_presetOrganizations);
     _displayName = _fallbackName(widget.account.name);
     _headline = _defaultHeadline;
     _description = _defaultDescription;
@@ -157,6 +189,10 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           _defaultAvailability,
         );
       }
+      final savedOrganization = _organizationFromCustomization(customization);
+      if (savedOrganization != null) {
+        _selectedOrganization = _upsertOrganization(savedOrganization);
+      }
     });
   }
 
@@ -232,6 +268,13 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           subtitle:
               'Индивидуально, группы, онлайн, офлайн и доступность для записи.',
           onTap: _openWorkFormatEditor,
+        ),
+        ProfileEditOption(
+          icon: Icons.location_city_outlined,
+          title: 'Организация',
+          subtitle:
+              'Выберите место на карте, к которому вы прикреплены, или добавьте свою точку.',
+          onTap: _openOrganizationEditor,
         ),
       ],
       sections: [
@@ -331,6 +374,19 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
               ),
             ],
           ),
+        ),
+        ProfileSectionCard(
+          title: 'Организация',
+          subtitle:
+              'Показывает, к какой точке на карте прикреплён тренер и где проходят его занятия.',
+          child: _selectedOrganization == null
+              ? _CoachOrganizationEmptyState(
+                  onSelect: () => _openOrganizationEditor(context),
+                )
+              : _CoachOrganizationDetails(
+                  organization: _selectedOrganization!,
+                  accentColor: const Color(0xFF1D9A9D),
+                ),
         ),
         ProfileSectionCard(
           title: 'Что получает ученик',
@@ -487,6 +543,87 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     }
   }
 
+  Future<void> _openOrganizationEditor(BuildContext context) async {
+    final selection =
+        await showModalBottomSheet<_CoachOrganizationSelectionResult>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) => _CoachOrganizationPickerSheet(
+            organizations: _organizations,
+            selectedOrganization: _selectedOrganization,
+          ),
+        );
+
+    if (selection == null) {
+      return;
+    }
+
+    if (selection.wantsToAdd) {
+      final addedOrganization =
+          await showModalBottomSheet<_CoachOrganizationFormResult>(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) => const _CoachAddOrganizationSheet(),
+          );
+
+      if (addedOrganization == null) {
+        return;
+      }
+
+      final organization = _upsertOrganization(
+        _CoachOrganization(
+          name: _displayValue(
+            addedOrganization.name,
+            'Новая организация тренера',
+          ),
+          sport: _displayValue(
+            addedOrganization.sport,
+            _defaultOrganizationSport,
+          ),
+          address: _displayValue(
+            addedOrganization.address,
+            _defaultOrganizationAddress,
+          ),
+          description: _displayValue(
+            addedOrganization.description,
+            _defaultOrganizationDescription,
+          ),
+          isCustom: true,
+        ),
+      );
+
+      setState(() {
+        _selectedOrganization = organization;
+      });
+
+      await _persistCoachCustomization();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Организация добавлена в профиль')),
+        );
+      }
+      return;
+    }
+
+    final organization = selection.organization;
+    if (organization == null) {
+      return;
+    }
+
+    setState(() {
+      _selectedOrganization = organization;
+    });
+
+    await _persistCoachCustomization();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Организация выбрана')),
+      );
+    }
+  }
+
   Future<void> _persistCoachCustomization() async {
     await ProfileCustomizationStorage.saveCoachCustomization(
       accountId: widget.account.id,
@@ -501,6 +638,10 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         workFormat: _workFormat.trim(),
         workMode: _workMode.trim(),
         availability: _availability.trim(),
+        organizationName: _selectedOrganization?.name.trim(),
+        organizationSport: _selectedOrganization?.sport.trim(),
+        organizationAddress: _selectedOrganization?.address.trim(),
+        organizationDescription: _selectedOrganization?.description.trim(),
       ),
     );
   }
@@ -572,6 +713,54 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     }
 
     return normalized;
+  }
+
+  _CoachOrganization? _organizationFromCustomization(
+    CoachProfileCustomization customization,
+  ) {
+    final rawName = customization.organizationName?.trim();
+    if (rawName == null || rawName.isEmpty || rawName.toLowerCase() == 'null') {
+      return null;
+    }
+
+    final draft = _CoachOrganization(
+      name: rawName,
+      sport: _displayValue(
+        customization.organizationSport,
+        _defaultOrganizationSport,
+      ),
+      address: _displayValue(
+        customization.organizationAddress,
+        _defaultOrganizationAddress,
+      ),
+      description: _displayValue(
+        customization.organizationDescription,
+        _defaultOrganizationDescription,
+      ),
+      isCustom: true,
+    );
+
+    return _findOrganization(draft) ?? draft;
+  }
+
+  _CoachOrganization _upsertOrganization(_CoachOrganization organization) {
+    final existing = _findOrganization(organization);
+    if (existing != null) {
+      return existing;
+    }
+
+    _organizations.insert(0, organization);
+    return organization;
+  }
+
+  _CoachOrganization? _findOrganization(_CoachOrganization organization) {
+    for (final item in _organizations) {
+      if (item.comparisonKey == organization.comparisonKey) {
+        return item;
+      }
+    }
+
+    return null;
   }
 }
 
@@ -682,6 +871,49 @@ class _CoachWorkFormatEditorResult {
     required this.workMode,
     required this.availability,
   });
+}
+
+class _CoachOrganizationSelectionResult {
+  final _CoachOrganization? organization;
+  final bool wantsToAdd;
+
+  const _CoachOrganizationSelectionResult({
+    this.organization,
+    this.wantsToAdd = false,
+  });
+}
+
+class _CoachOrganizationFormResult {
+  final String name;
+  final String sport;
+  final String address;
+  final String description;
+
+  const _CoachOrganizationFormResult({
+    required this.name,
+    required this.sport,
+    required this.address,
+    required this.description,
+  });
+}
+
+class _CoachOrganization {
+  final String name;
+  final String sport;
+  final String address;
+  final String description;
+  final bool isCustom;
+
+  const _CoachOrganization({
+    required this.name,
+    required this.sport,
+    required this.address,
+    required this.description,
+    this.isCustom = false,
+  });
+
+  String get comparisonKey =>
+      '${name.trim().toLowerCase()}|${address.trim().toLowerCase()}';
 }
 
 class _CoachShowcaseEditorSheet extends StatefulWidget {
@@ -1004,6 +1236,213 @@ class _CoachWorkFormatEditorSheetState
   }
 }
 
+class _CoachOrganizationPickerSheet extends StatelessWidget {
+  final List<_CoachOrganization> organizations;
+  final _CoachOrganization? selectedOrganization;
+
+  const _CoachOrganizationPickerSheet({
+    required this.organizations,
+    required this.selectedOrganization,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      heightFactor: 0.84,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 52,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors.borderColor,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Организация',
+                  style: GoogleFonts.philosopher(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Выберите готовую точку на карте, к которой привязан тренер, или добавьте свою организацию в анкету.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.45,
+                    color: AppColors.textSecondaryColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: organizations.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final organization = organizations[index];
+                      final isSelected =
+                          selectedOrganization?.comparisonKey ==
+                          organization.comparisonKey;
+
+                      return _CoachOrganizationOptionTile(
+                        organization: organization,
+                        isSelected: isSelected,
+                        onTap: () {
+                          Navigator.of(context).pop(
+                            _CoachOrganizationSelectionResult(
+                              organization: organization,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop(
+                        const _CoachOrganizationSelectionResult(
+                          wantsToAdd: true,
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.activeColor,
+                      side: BorderSide(color: AppColors.activeColor),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add_location_alt_outlined),
+                    label: Text(
+                      'Добавить свою точку',
+                      style: GoogleFonts.philosopher(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoachAddOrganizationSheet extends StatefulWidget {
+  const _CoachAddOrganizationSheet();
+
+  @override
+  State<_CoachAddOrganizationSheet> createState() =>
+      _CoachAddOrganizationSheetState();
+}
+
+class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _sportController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _sportController = TextEditingController();
+    _addressController = TextEditingController();
+    _descriptionController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _sportController.dispose();
+    _addressController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _CoachEditorSheet(
+      title: 'Новая организация',
+      subtitle:
+          'Заполните короткую анкету для новой точки на карте: название, вид спорта, адрес и описание.',
+      saveLabel: 'Сохранить организацию',
+      onSave: () {
+        Navigator.of(context).pop(
+          _CoachOrganizationFormResult(
+            name: _nameController.text,
+            sport: _sportController.text,
+            address: _addressController.text,
+            description: _descriptionController.text,
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _CoachEditorLabel(title: 'Название'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _nameController,
+            hintText: 'Например, Sports Hub Sokolniki',
+            textCapitalization: TextCapitalization.words,
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Вид спорта'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _sportController,
+            hintText: 'Например, бокс / плавание / ОФП',
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Адрес'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _addressController,
+            hintText: 'Укажите город, улицу и ориентир',
+            minLines: 2,
+            maxLines: 3,
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Описание'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _descriptionController,
+            hintText:
+                'Коротко опишите площадку, формат занятий и чем она удобна ученику.',
+            minLines: 3,
+            maxLines: 4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CoachEditorSheet extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -1095,6 +1534,293 @@ class _CoachEditorSheet extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoachOrganizationDetails extends StatelessWidget {
+  final _CoachOrganization organization;
+  final Color accentColor;
+
+  const _CoachOrganizationDetails({
+    required this.organization,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFF2F8FF), Color(0xFFEFFBF9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderColor),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(
+                  Icons.location_city_rounded,
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      organization.name,
+                      style: GoogleFonts.philosopher(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ProfileTag(
+                          text: organization.sport,
+                          color: accentColor,
+                        ),
+                        if (organization.isCustom)
+                          const ProfileTag(
+                            text: 'Своя точка',
+                            color: Color(0xFF2F71F7),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        ProfileInfoRow(
+          icon: Icons.place_outlined,
+          label: 'Адрес',
+          value: organization.address,
+        ),
+        const SizedBox(height: 18),
+        ProfileInfoRow(
+          icon: Icons.info_outline_rounded,
+          label: 'Описание',
+          value: organization.description,
+        ),
+      ],
+    );
+  }
+}
+
+class _CoachOrganizationEmptyState extends StatelessWidget {
+  final VoidCallback onSelect;
+
+  const _CoachOrganizationEmptyState({required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.borderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2F71F7).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.add_location_alt_outlined,
+                  color: Color(0xFF2F71F7),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Организация пока не выбрана',
+                style: GoogleFonts.philosopher(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Здесь появится точка на карте, к которой прикреплён тренер. Можно выбрать готовую организацию или оформить свою.',
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.45,
+                  color: AppColors.textSecondaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onSelect,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.activeColor,
+              side: BorderSide(color: AppColors.activeColor),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            icon: const Icon(Icons.apartment_rounded),
+            label: Text(
+              'Выбрать организацию',
+              style: GoogleFonts.philosopher(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CoachOrganizationOptionTile extends StatelessWidget {
+  final _CoachOrganization organization;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CoachOrganizationOptionTile({
+    required this.organization,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor = isSelected
+        ? AppColors.activeColor
+        : const Color(0xFF1D9A9D);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.activeColor.withValues(alpha: 0.06)
+              : AppColors.backgroundColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? AppColors.activeColor : AppColors.borderColor,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(Icons.place_rounded, color: accentColor),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        organization.name,
+                        style: GoogleFonts.philosopher(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ProfileTag(
+                            text: organization.sport,
+                            color: accentColor,
+                          ),
+                          if (organization.isCustom)
+                            const ProfileTag(
+                              text: 'Своя точка',
+                              color: Color(0xFF2F71F7),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  isSelected
+                      ? Icons.check_circle_rounded
+                      : Icons.chevron_right_rounded,
+                  color: accentColor,
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(
+              organization.address,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              organization.description,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.45,
+                color: AppColors.textSecondaryColor,
+              ),
+            ),
+          ],
         ),
       ),
     );
