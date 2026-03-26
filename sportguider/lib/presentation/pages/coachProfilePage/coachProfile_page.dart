@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/sport.dart';
+import 'package:sportguider/data/models/coach_organization_model.dart';
+import 'package:sportguider/data/repositories/coach_organizations_repository.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -36,30 +39,6 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       'Адрес организации появится здесь';
   static const _defaultOrganizationDescription =
       'Точка на карте, к которой прикреплён тренер, будет отображаться в этом блоке.';
-
-  static const List<_CoachOrganization> _presetOrganizations = [
-    _CoachOrganization(
-      name: 'Arena North',
-      sport: 'Функциональная подготовка',
-      address: 'Москва, Ленинградский проспект, 36',
-      description:
-          'Современный зал для персональных тренировок, ОФП и работы с техникой движения.',
-    ),
-    _CoachOrganization(
-      name: 'RunLab City',
-      sport: 'Бег и выносливость',
-      address: 'Москва, Лужнецкая набережная, 24',
-      description:
-          'Локация для беговой подготовки, тестов выносливости и групповых сессий на открытом воздухе.',
-    ),
-    _CoachOrganization(
-      name: 'Balance Studio',
-      sport: 'Йога и мобильность',
-      address: 'Москва, улица Покровка, 17с1',
-      description:
-          'Студия с акцентом на мобильность, восстановление и аккуратную персональную работу.',
-    ),
-  ];
 
   static const List<_CoachAvatarOption> _avatarOptions = [
     _CoachAvatarOption(
@@ -103,14 +82,16 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   late String _workFormat;
   late String _workMode;
   late String _availability;
-  late final List<_CoachOrganization> _organizations;
+  List<_CoachOrganization> _organizations = [];
   _CoachOrganization? _selectedOrganization;
   int _avatarIndex = 0;
+  bool _isLoadingOrganizations = true;
+
+  final _organizationsRepo = CoachOrganizationsRepository();
 
   @override
   void initState() {
     super.initState();
-    _organizations = List<_CoachOrganization>.from(_presetOrganizations);
     _displayName = _fallbackName(widget.account.name);
     _headline = _defaultHeadline;
     _description = _defaultDescription;
@@ -124,15 +105,27 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   }
 
   Future<void> _loadCustomization() async {
-    final customization = await ProfileCustomizationStorage.readCoachCustomization(
-      widget.account.id,
-    );
+    final results = await Future.wait([
+      ProfileCustomizationStorage.readCoachCustomization(widget.account.id),
+      _organizationsRepo.getAll(),
+    ]);
 
-    if (!mounted) {
-      return;
+    if (!mounted) return;
+
+    final customization = results[0] as CoachProfileCustomization;
+    var organizationModels = results[1] as List<CoachOrganizationModel>;
+
+    if (organizationModels.isEmpty) {
+      organizationModels = await _organizationsRepo.seedPresets();
+      if (!mounted) return;
     }
 
     setState(() {
+      _organizations = organizationModels
+          .map(_CoachOrganization.fromModel)
+          .toList();
+      _isLoadingOrganizations = false;
+
       if (customization.displayName != null) {
         _displayName = _displayValue(
           customization.displayName!,
@@ -189,9 +182,19 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           _defaultAvailability,
         );
       }
-      final savedOrganization = _organizationFromCustomization(customization);
-      if (savedOrganization != null) {
-        _selectedOrganization = _upsertOrganization(savedOrganization);
+
+      // Resolve selected org: first by ID (new), then by name/address (legacy)
+      final savedId = customization.organizationId;
+      if (savedId != null && savedId.isNotEmpty) {
+        _selectedOrganization = _organizations
+            .where((o) => o.id == savedId)
+            .firstOrNull;
+      }
+      if (_selectedOrganization == null) {
+        final legacy = _organizationFromCustomization(customization);
+        if (legacy != null) {
+          _selectedOrganization = _findOrganization(legacy) ?? legacy;
+        }
       }
     });
   }
@@ -544,6 +547,13 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   }
 
   Future<void> _openOrganizationEditor(BuildContext context) async {
+    if (_isLoadingOrganizations) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Загрузка организаций...')),
+      );
+      return;
+    }
+
     final selection =
         await showModalBottomSheet<_CoachOrganizationSelectionResult>(
           context: context,
@@ -572,29 +582,23 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         return;
       }
 
-      final organization = _upsertOrganization(
-        _CoachOrganization(
-          name: _displayValue(
-            addedOrganization.name,
-            'Новая организация тренера',
-          ),
-          sport: _displayValue(
-            addedOrganization.sport,
-            _defaultOrganizationSport,
-          ),
-          address: _displayValue(
-            addedOrganization.address,
-            _defaultOrganizationAddress,
-          ),
-          description: _displayValue(
-            addedOrganization.description,
-            _defaultOrganizationDescription,
-          ),
-          isCustom: true,
-        ),
+      final draft = CoachOrganizationModel(
+        id: '',
+        name: _displayValue(addedOrganization.name, 'Новая организация тренера'),
+        sport: addedOrganization.sport,
+        address: _displayValue(addedOrganization.address, _defaultOrganizationAddress),
+        description: _displayValue(addedOrganization.description, _defaultOrganizationDescription),
+        isCustom: true,
+        latitude: addedOrganization.latitude,
+        longitude: addedOrganization.longitude,
       );
 
+      final saved = await _organizationsRepo.add(draft);
+      if (!mounted) return;
+
+      final organization = _CoachOrganization.fromModel(saved);
       setState(() {
+        _organizations.insert(0, organization);
         _selectedOrganization = organization;
       });
 
@@ -638,10 +642,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         workFormat: _workFormat.trim(),
         workMode: _workMode.trim(),
         availability: _availability.trim(),
-        organizationName: _selectedOrganization?.name.trim(),
-        organizationSport: _selectedOrganization?.sport.trim(),
-        organizationAddress: _selectedOrganization?.address.trim(),
-        organizationDescription: _selectedOrganization?.description.trim(),
+        organizationId: _selectedOrganization?.id,
       ),
     );
   }
@@ -743,15 +744,6 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     return _findOrganization(draft) ?? draft;
   }
 
-  _CoachOrganization _upsertOrganization(_CoachOrganization organization) {
-    final existing = _findOrganization(organization);
-    if (existing != null) {
-      return existing;
-    }
-
-    _organizations.insert(0, organization);
-    return organization;
-  }
 
   _CoachOrganization? _findOrganization(_CoachOrganization organization) {
     for (final item in _organizations) {
@@ -885,19 +877,24 @@ class _CoachOrganizationSelectionResult {
 
 class _CoachOrganizationFormResult {
   final String name;
-  final String sport;
+  final Sport sport;
   final String address;
   final String description;
+  final double latitude;
+  final double longitude;
 
   const _CoachOrganizationFormResult({
     required this.name,
     required this.sport,
     required this.address,
     required this.description,
+    required this.latitude,
+    required this.longitude,
   });
 }
 
 class _CoachOrganization {
+  final String id;
   final String name;
   final String sport;
   final String address;
@@ -905,12 +902,24 @@ class _CoachOrganization {
   final bool isCustom;
 
   const _CoachOrganization({
+    this.id = '',
     required this.name,
     required this.sport,
     required this.address,
     required this.description,
     this.isCustom = false,
   });
+
+  factory _CoachOrganization.fromModel(CoachOrganizationModel model) {
+    return _CoachOrganization(
+      id: model.id,
+      name: model.name,
+      sport: model.sport.ru,
+      address: model.address,
+      description: model.description,
+      isCustom: model.isCustom,
+    );
+  }
 
   String get comparisonKey =>
       '${name.trim().toLowerCase()}|${address.trim().toLowerCase()}';
@@ -1360,27 +1369,32 @@ class _CoachAddOrganizationSheet extends StatefulWidget {
       _CoachAddOrganizationSheetState();
 }
 
-class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> {
+class _CoachAddOrganizationSheetState
+    extends State<_CoachAddOrganizationSheet> {
   late final TextEditingController _nameController;
-  late final TextEditingController _sportController;
   late final TextEditingController _addressController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _latController;
+  late final TextEditingController _lonController;
+  Sport _selectedSport = Sport.football;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _sportController = TextEditingController();
     _addressController = TextEditingController();
     _descriptionController = TextEditingController();
+    _latController = TextEditingController();
+    _lonController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _sportController.dispose();
     _addressController.dispose();
     _descriptionController.dispose();
+    _latController.dispose();
+    _lonController.dispose();
     super.dispose();
   }
 
@@ -1389,15 +1403,19 @@ class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> 
     return _CoachEditorSheet(
       title: 'Новая организация',
       subtitle:
-          'Заполните короткую анкету для новой точки на карте: название, вид спорта, адрес и описание.',
+          'Заполните анкету для новой точки на карте: название, вид спорта, адрес, координаты и описание.',
       saveLabel: 'Сохранить организацию',
       onSave: () {
+        final lat = double.tryParse(_latController.text.trim()) ?? 0.0;
+        final lon = double.tryParse(_lonController.text.trim()) ?? 0.0;
         Navigator.of(context).pop(
           _CoachOrganizationFormResult(
             name: _nameController.text,
-            sport: _sportController.text,
+            sport: _selectedSport,
             address: _addressController.text,
             description: _descriptionController.text,
+            latitude: lat,
+            longitude: lon,
           ),
         );
       },
@@ -1414,9 +1432,11 @@ class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> 
           const SizedBox(height: 20),
           const _CoachEditorLabel(title: 'Вид спорта'),
           const SizedBox(height: 10),
-          _CoachEditorField(
-            controller: _sportController,
-            hintText: 'Например, бокс / плавание / ОФП',
+          _CoachSportDropdown(
+            value: _selectedSport,
+            onChanged: (sport) {
+              setState(() => _selectedSport = sport);
+            },
           ),
           const SizedBox(height: 20),
           const _CoachEditorLabel(title: 'Адрес'),
@@ -1426,6 +1446,34 @@ class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> 
             hintText: 'Укажите город, улицу и ориентир',
             minLines: 2,
             maxLines: 3,
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Координаты'),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _CoachEditorField(
+                  controller: _latController,
+                  hintText: 'Широта (55.7558)',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _CoachEditorField(
+                  controller: _lonController,
+                  hintText: 'Долгота (37.6173)',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           const _CoachEditorLabel(title: 'Описание'),
@@ -1438,6 +1486,47 @@ class _CoachAddOrganizationSheetState extends State<_CoachAddOrganizationSheet> 
             maxLines: 4,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CoachSportDropdown extends StatelessWidget {
+  final Sport value;
+  final ValueChanged<Sport> onChanged;
+
+  const _CoachSportDropdown({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<Sport>(
+          value: value,
+          isExpanded: true,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimaryColor,
+          ),
+          items: Sport.values
+              .map(
+                (s) => DropdownMenuItem(
+                  value: s,
+                  child: Text(s.ru),
+                ),
+              )
+              .toList(),
+          onChanged: (s) {
+            if (s != null) onChanged(s);
+          },
+        ),
       ),
     );
   }

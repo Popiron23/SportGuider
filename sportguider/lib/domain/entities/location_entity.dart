@@ -22,16 +22,43 @@ class LocationEntity extends Equatable {
     this.description,
     this.coaches,
   });
-  factory LocationEntity.fromFirebase(Map<Object?, Object?> data) {
+  static LocationEntity? tryFromFirebase(Map<Object?, Object?> data) {
+    final lat = (data['latitude'] as num?)?.toDouble();
+    final lon = (data['longitude'] as num?)?.toDouble();
+    if (lat == null || lon == null) return null;
+
+    final rawId = data['id'];
+    final id = rawId is int
+        ? rawId.toString()
+        : ((rawId as String?) ?? data.hashCode.toString());
+
+    final name =
+        (data['name'] as String?) ?? (data['title'] as String?) ?? '';
+
+    final sportStr = data['sport'] as String?;
+    Sport? sport;
+    if (sportStr != null) {
+      try {
+        sport = Sport.values.firstWhere((e) => e.name == sportStr);
+      } catch (_) {
+        sport = null;
+      }
+    }
+    if (sport == null) return null;
+
     return LocationEntity(
-      id: (data['id'] as int).toString(),
-      latitude: (data['latitude'] as double),
-      longitude: (data['longitude'] as double),
-      name: (data['name'] as String),
-      sport: Sport.values.firstWhere(
-        (e) => e.toString() == 'Sport.${data['sport'] as String}',
-      ),
+      id: id,
+      latitude: lat,
+      longitude: lon,
+      name: name,
+      sport: sport,
+      address: data['address'] as String?,
+      description: data['description'] as String?,
     );
+  }
+
+  factory LocationEntity.fromFirebase(Map<Object?, Object?> data) {
+    return LocationEntity.tryFromFirebase(data)!;
   }
 
   // Конвертация в Yandex Point
