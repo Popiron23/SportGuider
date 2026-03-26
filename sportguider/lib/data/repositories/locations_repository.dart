@@ -17,7 +17,10 @@ class LocationsRepository {
     final locationsData = Map<String, dynamic>.from(snapshot.value as Map);
 
     final List<LocationEntity> locations = locationsData.values
-        .map((e) => LocationEntity.fromFirebase(e))
+        .map((e) => LocationEntity.tryFromFirebase(
+              Map<Object?, Object?>.from(e as Map),
+            ))
+        .whereType<LocationEntity>()
         .where((e) => sports.contains(e.sport))
         .toList();
     return locations;
