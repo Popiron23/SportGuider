@@ -128,7 +128,7 @@ class _AuthPageState extends State<AuthPage> {
                       UserEntity.fromModel,
                       email,
                       password,
-                      context,
+                      context as BuildContext,
                       _errorMes,
                     );
                   } else {
@@ -138,7 +138,7 @@ class _AuthPageState extends State<AuthPage> {
                       CoachEntity.fromModel,
                       email,
                       password,
-                      context,
+                      context as BuildContext,
                       _errorMes,
                     );
                   }

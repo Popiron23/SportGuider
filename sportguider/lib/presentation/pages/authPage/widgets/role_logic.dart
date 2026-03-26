@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:sportguider/data/models/account_model.dart';
@@ -13,7 +14,7 @@ Future<void> roleLogic(
   AccountEntity Function(AccountModel) entityFactory,
   String email,
   String password,
-  dynamic context,
+  BuildContext context,
   dynamic _errorMes,
 ) async {
   DatabaseEvent event = await dbRef.once();

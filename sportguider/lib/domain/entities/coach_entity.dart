@@ -1,3 +1,4 @@
+import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 
 class CoachEntity extends AccountEntity {
@@ -18,4 +19,14 @@ class CoachEntity extends AccountEntity {
     super.age,
     super.favoriteSport,
   });
+
+  CoachEntity.fromModel(AccountModel model)
+    : this(
+        id: model.id,
+        name: model.name,
+        email: model.email,
+        phoneNumber: model.phoneNumber,
+        role: model.role,
+        favoriteSport: model.favoriteSport,
+      );
 }
