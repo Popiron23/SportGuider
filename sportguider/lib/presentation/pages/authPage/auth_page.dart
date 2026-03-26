@@ -102,24 +102,24 @@ class _AuthPageState extends State<AuthPage> {
               child: PasswordInputField(controller: passwordController),
             ),
             const SizedBox(height: 30),
-            ToggleSwitch(
-              minWidth: 200,
-              initialLabelIndex: _selectedRoleIndex,
-              totalSwitches: 2,
-              activeFgColor: Colors.white,
-              inactiveBgColor: Colors.white,
-              activeBgColor: [
-                AppColors.activeColor,
-                AppColors.activeColor,
-                AppColors.activeColor,
-              ],
-              labels: const ['Тренер', 'Спортсмен'],
-              onToggle: (index) {
-                setState(() {
-                  _selectedRoleIndex = index ?? 1;
-                });
-              },
-            ),
+            // ToggleSwitch(
+            //   minWidth: 200,
+            //   initialLabelIndex: _selectedRoleIndex,
+            //   totalSwitches: 2,
+            //   activeFgColor: Colors.white,
+            //   inactiveBgColor: Colors.white,
+            //   activeBgColor: [
+            //     AppColors.activeColor,
+            //     AppColors.activeColor,
+            //     AppColors.activeColor,
+            //   ],
+            //   labels: const ['Тренер', 'Спортсмен'],
+            //   onToggle: (index) {
+            //     setState(() {
+            //       _selectedRoleIndex = index ?? 1;
+            //     });
+            //   },
+            // ),
             const SizedBox(height: 30),
             SizedBox(
               width: 320,
@@ -165,9 +165,9 @@ class _AuthPageState extends State<AuthPage> {
                     return;
                   }
 
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(errorMessage ?? 'Ошибка входа')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(errorMessage ?? 'Ошибка входа')),
+                  );
                 },
               ),
             ),

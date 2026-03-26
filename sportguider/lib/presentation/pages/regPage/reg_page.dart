@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/data/models/account_model.dart';
+import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -25,6 +26,7 @@ class RegPage extends StatefulWidget {
 class _RegPageState extends State<RegPage> {
   late final TextEditingController emailController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+  DatabaseService databaseService = DatabaseService();
   int _selectedRoleIndex = 1;
 
   Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
@@ -37,7 +39,12 @@ class _RegPageState extends State<RegPage> {
   }
 
   Future<void> _openProfile(AccountEntity account) async {
-    await ProfileRoleStorage.saveRole(_selectedRole);
+    //await ProfileRoleStorage.saveRole(_selectedRole);
+    Map<String, dynamic> data = {
+      'email': 'example@mail.com',
+      'role': _selectedRole == Role.coach ? "coach" : "user",
+    };
+    databaseService.create(path: 'Users', data: data);
 
     if (!mounted) {
       return;
@@ -165,7 +172,9 @@ class _RegPageState extends State<RegPage> {
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(errorMessage ?? 'Ошибка регистрации')),
+                    SnackBar(
+                      content: Text(errorMessage ?? 'Ошибка регистрации'),
+                    ),
                   );
                 },
               ),
