@@ -108,7 +108,7 @@ class _RegPageState extends State<RegPage> {
               labels: ['Спортсмен', 'Тренер'],
               onToggle: (index) {
                 print('switched to: $index');
-                if (index == 'Спортсмен') {
+                if (index == 0) {
                   roleController = 'user';
                 } else {
                   roleController = 'coach';

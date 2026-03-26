@@ -1,9 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:sportguider/data/models/account_model.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
+import 'package:sportguider/domain/entities/coach_entity.dart';
+import 'package:sportguider/domain/entities/user_entity.dart';
 import 'package:sportguider/firebase_service.dart';
+import 'package:sportguider/presentation/pages/authPage/widgets/role_logic.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
 import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
@@ -25,6 +29,11 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   late final TextEditingController usernameController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+
+  late String roleController = 'user';
+
+  DatabaseReference dbRefUs = FirebaseDatabase.instance.ref().child('Users');
+  DatabaseReference dbRefCo = FirebaseDatabase.instance.ref().child('Coaches');
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +103,11 @@ class _AuthPageState extends State<AuthPage> {
               labels: ['Спортсмен', 'Тренер'],
               onToggle: (index) {
                 print('switched to: $index');
+                if (index == 0) {
+                  roleController = 'user';
+                } else {
+                  roleController = 'coach';
+                }
               },
             ),
             SizedBox(height: 30),
@@ -107,42 +121,63 @@ class _AuthPageState extends State<AuthPage> {
                   final email = usernameController.text;
                   final password = passwordController.text;
                   var _errorMes = null;
-                  if (email == 'admin' && password == 'admin') {
-                    context.router.replace(
-                      UserProfileRoute(
-                        account: AccountEntity(
-                          id: '1',
-                          name: 'Иванов Иван',
-                          email: 'example@mail.com',
-                          phoneNumber: '+7900123123',
-                          favoriteSport: 'Баскетбол',
-                        ),
-                      ),
+                  if (roleController == 'user') {
+                    roleLogic(
+                      dbRefUs,
+                      roleController,
+                      UserEntity.fromModel,
+                      email,
+                      password,
+                      context,
+                      _errorMes,
                     );
                   } else {
-                    final result = await FirebaseService.onLogin(
-                      email: email,
-                      password: password,
+                    roleLogic(
+                      dbRefCo,
+                      roleController,
+                      CoachEntity.fromModel,
+                      email,
+                      password,
+                      context,
+                      _errorMes,
                     );
-                    if (result!.isSuccess) {
-                      context.router.replace(
-                        //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
-                        //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
-                        UserProfileRoute(
-                          account: AccountEntity.fromModel(
-                            AccountModel.fromFirebaseUser(
-                              result!.credential!.user,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      _errorMes = result.errorMes;
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(_errorMes)));
-                    }
                   }
+                  // if (email == 'admin' && password == 'admin') {
+                  //   context.router.replace(
+                  //     UserProfileRoute(
+                  //       account: AccountEntity(
+                  //         id: '1',
+                  //         name: 'Иванов Иван',
+                  //         email: 'example@mail.com',
+                  //         phoneNumber: '+7900123123',
+                  //         favoriteSport: 'Баскетбол',
+                  //       ),
+                  //     ),
+                  //   );
+                  // } else {
+                  //   final result = await FirebaseService.onLogin(
+                  //     email: email,
+                  //     password: password,
+                  //   );
+                  //   if (result!.isSuccess) {
+                  //     context.router.replace(
+                  //       //переходим на страницу с инфо о пользователе, передавая в аргументе accountEntity
+                  //       //AccountEntity получаем из AccountModel преобразованием данных из firebase через специальный конструктор
+                  //       UserProfileRoute(
+                  //         account: AccountEntity.fromModel(
+                  //           AccountModel.fromFirebaseUser(
+                  //             result!.credential!.user,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     );
+                  //   } else {
+                  //     _errorMes = result.errorMes;
+                  //     ScaffoldMessenger.of(
+                  //       context,
+                  //     ).showSnackBar(SnackBar(content: Text(_errorMes)));
+                  //   }
+                  // }
                 },
               ),
             ),
