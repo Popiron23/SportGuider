@@ -11,6 +11,7 @@ import 'package:sportguider/presentation/pages/profile/profile_customization_sto
 import 'package:sportguider/presentation/pages/profile/profile_role_storage.dart';
 import 'package:sportguider/presentation/pages/profile/widgets/profile_shell.dart';
 import 'package:sportguider/routes/router.gr.dart';
+import 'package:yandex_geocoder/yandex_geocoder.dart';
 
 @RoutePage()
 class CoachProfilePage extends StatefulWidget {
@@ -35,8 +36,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   static const _defaultWorkMode = 'Онлайн и офлайн';
   static const _defaultAvailability = 'Открыт к новым заявкам';
   static const _defaultOrganizationSport = 'Функциональная подготовка';
-  static const _defaultOrganizationAddress =
-      'Адрес организации появится здесь';
+  static const _defaultOrganizationAddress = 'Адрес организации появится здесь';
   static const _defaultOrganizationDescription =
       'Точка на карте, к которой прикреплён тренер, будет отображаться в этом блоке.';
 
@@ -171,10 +171,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         );
       }
       if (customization.workMode != null) {
-        _workMode = _displayValue(
-          customization.workMode!,
-          _defaultWorkMode,
-        );
+        _workMode = _displayValue(customization.workMode!, _defaultWorkMode);
       }
       if (customization.availability != null) {
         _availability = _displayValue(
@@ -261,8 +258,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         ProfileEditOption(
           icon: Icons.military_tech_outlined,
           title: 'Специализация',
-          subtitle:
-              'Направления подготовки, спортивные акценты и достижения.',
+          subtitle: 'Направления подготовки, спортивные акценты и достижения.',
           onTap: _openSpecializationEditor,
         ),
         ProfileEditOption(
@@ -391,35 +387,6 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
                   accentColor: const Color(0xFF1D9A9D),
                 ),
         ),
-        ProfileSectionCard(
-          title: 'Что получает ученик',
-          subtitle:
-              'Небольшой продающий блок, который можно потом расширить отзывами или слотами расписания.',
-          child: const Column(
-            children: [
-              _CoachBenefitTile(
-                icon: Icons.route_rounded,
-                title: 'Понятный маршрут развития',
-                subtitle:
-                    'От первой встречи до устойчивого тренировочного ритма без хаоса.',
-              ),
-              SizedBox(height: 14),
-              _CoachBenefitTile(
-                icon: Icons.checklist_rtl_rounded,
-                title: 'Собранная структура занятий',
-                subtitle:
-                    'Тренерский профиль сразу показывает, как выстроена работа и чего ждать.',
-              ),
-              SizedBox(height: 14),
-              _CoachBenefitTile(
-                icon: Icons.favorite_border_rounded,
-                title: 'Человечная коммуникация',
-                subtitle:
-                    'Профиль выглядит дружелюбно и вызывает доверие ещё до первого сообщения.',
-              ),
-            ],
-          ),
-        ),
       ],
       onLogout: (context) async {
         await FirebaseService().logOut();
@@ -441,8 +408,9 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         initialAvatarIndex: _avatarIndex,
         initialDisplayName: _displayName,
         initialHeadline: _headline == _defaultHeadline ? '' : _headline,
-        initialDescription:
-            _description == _defaultDescription ? '' : _description,
+        initialDescription: _description == _defaultDescription
+            ? ''
+            : _description,
       ),
     );
 
@@ -477,10 +445,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       isScrollControlled: true,
       builder: (context) => _CoachSpecializationEditorSheet(
         initialSpecialization: _specialization,
-        initialSportsAccents:
-            _sportsAccents == _defaultSportsAccents ? '' : _sportsAccents,
-        initialAchievements:
-            _achievements == _defaultAchievements ? '' : _achievements,
+        initialSportsAccents: _sportsAccents == _defaultSportsAccents
+            ? ''
+            : _sportsAccents,
+        initialAchievements: _achievements == _defaultAchievements
+            ? ''
+            : _achievements,
       ),
     );
 
@@ -497,17 +467,14 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         result.sportsAccents,
         _defaultSportsAccents,
       );
-      _achievements = _displayValue(
-        result.achievements,
-        _defaultAchievements,
-      );
+      _achievements = _displayValue(result.achievements, _defaultAchievements);
     });
 
     await _persistCoachCustomization();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Специализация обновлена')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Специализация обновлена')));
     }
   }
 
@@ -517,11 +484,11 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => _CoachWorkFormatEditorSheet(
-        initialWorkFormat:
-            _workFormat == _defaultWorkFormat ? '' : _workFormat,
+        initialWorkFormat: _workFormat == _defaultWorkFormat ? '' : _workFormat,
         initialWorkMode: _workMode == _defaultWorkMode ? '' : _workMode,
-        initialAvailability:
-            _availability == _defaultAvailability ? '' : _availability,
+        initialAvailability: _availability == _defaultAvailability
+            ? ''
+            : _availability,
       ),
     );
 
@@ -532,25 +499,22 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     setState(() {
       _workFormat = _displayValue(result.workFormat, _defaultWorkFormat);
       _workMode = _displayValue(result.workMode, _defaultWorkMode);
-      _availability = _displayValue(
-        result.availability,
-        _defaultAvailability,
-      );
+      _availability = _displayValue(result.availability, _defaultAvailability);
     });
 
     await _persistCoachCustomization();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Формат работы обновлён')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Формат работы обновлён')));
     }
   }
 
   Future<void> _openOrganizationEditor(BuildContext context) async {
     if (_isLoadingOrganizations) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Загрузка организаций...')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Загрузка организаций...')));
       return;
     }
 
@@ -584,10 +548,19 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
 
       final draft = CoachOrganizationModel(
         id: '',
-        name: _displayValue(addedOrganization.name, 'Новая организация тренера'),
+        name: _displayValue(
+          addedOrganization.name,
+          'Новая организация тренера',
+        ),
         sport: addedOrganization.sport,
-        address: _displayValue(addedOrganization.address, _defaultOrganizationAddress),
-        description: _displayValue(addedOrganization.description, _defaultOrganizationDescription),
+        address: _displayValue(
+          addedOrganization.address,
+          _defaultOrganizationAddress,
+        ),
+        description: _displayValue(
+          addedOrganization.description,
+          _defaultOrganizationDescription,
+        ),
         isCustom: true,
         latitude: addedOrganization.latitude,
         longitude: addedOrganization.longitude,
@@ -622,9 +595,9 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
 
     await _persistCoachCustomization();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Организация выбрана')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Организация выбрана')));
     }
   }
 
@@ -743,7 +716,6 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
 
     return _findOrganization(draft) ?? draft;
   }
-
 
   _CoachOrganization? _findOrganization(_CoachOrganization organization) {
     for (final item in _organizations) {
@@ -1021,11 +993,7 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
                       width: 2,
                     ),
                   ),
-                  child: Icon(
-                    option.icon,
-                    size: 32,
-                    color: option.iconColor,
-                  ),
+                  child: Icon(option.icon, size: 32, color: option.iconColor),
                 ),
               );
             }),
@@ -1405,9 +1373,21 @@ class _CoachAddOrganizationSheetState
       subtitle:
           'Заполните анкету для новой точки на карте: название, вид спорта, адрес, координаты и описание.',
       saveLabel: 'Сохранить организацию',
-      onSave: () {
-        final lat = double.tryParse(_latController.text.trim()) ?? 0.0;
-        final lon = double.tryParse(_lonController.text.trim()) ?? 0.0;
+      onSave: () async {
+        final geocoder = YandexGeocoder(
+          apiKey: 'a3310aa7-7123-4f79-b44b-33cda9b41cfd',
+        );
+        final request = DirectGeocodeRequest(
+          addressGeocode: _addressController.text,
+          lang: Lang.ru, // Язык ответа
+          results: 1, // Нам нужен только самый релевантный результат
+        );
+
+        // 3. Выполняем запрос
+        final response = await geocoder.getGeocode(request);
+
+        final lat = response.firstPoint!.lat;
+        final lon = response.firstPoint!.lon;
         Navigator.of(context).pop(
           _CoachOrganizationFormResult(
             name: _nameController.text,
@@ -1446,34 +1426,6 @@ class _CoachAddOrganizationSheetState
             hintText: 'Укажите город, улицу и ориентир',
             minLines: 2,
             maxLines: 3,
-          ),
-          const SizedBox(height: 20),
-          const _CoachEditorLabel(title: 'Координаты'),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _CoachEditorField(
-                  controller: _latController,
-                  hintText: 'Широта (55.7558)',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: true,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _CoachEditorField(
-                  controller: _lonController,
-                  hintText: 'Долгота (37.6173)',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: true,
-                  ),
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 20),
           const _CoachEditorLabel(title: 'Описание'),
@@ -1516,12 +1468,7 @@ class _CoachSportDropdown extends StatelessWidget {
             color: AppColors.textPrimaryColor,
           ),
           items: Sport.values
-              .map(
-                (s) => DropdownMenuItem(
-                  value: s,
-                  child: Text(s.ru),
-                ),
-              )
+              .map((s) => DropdownMenuItem(value: s, child: Text(s.ru)))
               .toList(),
           onChanged: (s) {
             if (s != null) onChanged(s);
@@ -1665,10 +1612,7 @@ class _CoachOrganizationDetails extends StatelessWidget {
                   color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: Icon(
-                  Icons.location_city_rounded,
-                  color: accentColor,
-                ),
+                child: Icon(Icons.location_city_rounded, color: accentColor),
               ),
               const SizedBox(width: 14),
               Expanded(
