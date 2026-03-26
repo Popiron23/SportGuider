@@ -5,20 +5,26 @@ import 'package:sportguider/core/enums/role.dart';
 class AccountModel extends Equatable {
   final String id;
   final String? name;
+  final String? age;
   final String? email;
   final String? phoneNumber;
+  final String? photoUrl;
   final Role? role; // например: user, coach
   final String? favoriteSport;
-  final List<String> coaches;
+  final bool? isActive;
+  final DateTime? createdAt;
 
   const AccountModel({
     required this.id,
     this.name,
+    this.age,
     this.email,
     this.phoneNumber,
+    this.photoUrl,
     this.role = Role.user,
     this.favoriteSport,
-    this.coaches = const [],
+    this.isActive = true,
+    this.createdAt,
   });
 
   // Пустой аккаунт (для начального состояния)
@@ -40,7 +46,6 @@ class AccountModel extends Equatable {
           ? Role.admin
           : Role.user,
       favoriteSport: 'null',
-      coaches: [''],
     );
   }
 }

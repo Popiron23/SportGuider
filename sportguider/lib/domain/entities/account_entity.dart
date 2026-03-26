@@ -4,20 +4,26 @@ import 'package:sportguider/data/models/account_model.dart';
 class AccountEntity {
   final String id;
   final String? name;
+  final int? age;
   final String? email;
   final String? phoneNumber;
+  final String? photoUrl;
   final Role? role; // например: user, coach
   final String? favoriteSport;
-  final List<String> coaches;
+  final bool? isActive;
+  final DateTime? createdAt;
 
   const AccountEntity({
     required this.id,
     this.name,
+    this.age,
     this.email,
     this.phoneNumber,
+    this.photoUrl,
     this.role = Role.user,
     this.favoriteSport,
-    this.coaches = const [],
+    this.isActive = true,
+    this.createdAt,
   });
 
   AccountEntity.fromModel(AccountModel model)
@@ -28,6 +34,5 @@ class AccountEntity {
         phoneNumber: model.phoneNumber,
         role: model.role,
         favoriteSport: model.favoriteSport,
-        coaches: model.coaches,
       );
 }

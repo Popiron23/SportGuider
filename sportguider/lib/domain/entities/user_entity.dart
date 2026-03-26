@@ -1,23 +1,34 @@
+import 'package:sportguider/data/models/account_model.dart';
+import 'package:sportguider/domain/entities/account_entity.dart';
+
 enum gender { male, female }
 
-class UserEntity {
-  final String? name;
-  final int id;
-  final int? age;
+class UserEntity extends AccountEntity {
   final gender? gen;
-  final String? email;
-  final String? photo;
-  final bool? isActive;
-  final DateTime? createdAt;
+  final List<String> coaches;
 
   UserEntity({
-    required this.id,
-    this.name,
-    this.age,
+    required super.id,
     this.gen,
-    this.email,
-    this.photo,
-    this.isActive = true,
-    this.createdAt,
+    this.coaches = const [],
+    super.name,
+    super.email,
+    super.phoneNumber,
+    super.role,
+    super.isActive,
+    super.createdAt,
+    super.photoUrl,
+    super.age,
+    super.favoriteSport,
   });
+
+  UserEntity.fromModel(AccountModel model)
+    : this(
+        id: model.id,
+        name: model.name,
+        email: model.email,
+        phoneNumber: model.phoneNumber,
+        role: model.role,
+        favoriteSport: model.favoriteSport,
+      );
 }

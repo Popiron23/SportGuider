@@ -116,7 +116,6 @@ class _AuthPageState extends State<AuthPage> {
                           email: 'example@mail.com',
                           phoneNumber: '+7900123123',
                           favoriteSport: 'Баскетбол',
-                          coaches: ['Петров Петр Петрович'],
                         ),
                       ),
                     );

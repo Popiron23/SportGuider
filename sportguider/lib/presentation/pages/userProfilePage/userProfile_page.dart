@@ -53,14 +53,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
         const SizedBox(height: 30),
         Row(children: [Text('E-mail: '), Text(widget.account.email ?? '')]),
         const SizedBox(height: 30),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Тренеры: '),
-            ...widget.account.coaches.map((e) => Text(e)),
-          ],
-        ),
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.start,
+        //   crossAxisAlignment: CrossAxisAlignment.start,
+        //   children: [
+        //     Text('Тренеры: '),
+        //     ...widget.account.coaches.map((e) => Text(e)),
+        //   ],
+        // ),
         TextButton(
           onPressed: () {
             FirebaseService().logOut();
