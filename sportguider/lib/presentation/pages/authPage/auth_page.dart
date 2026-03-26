@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/data/models/account_model.dart';
+import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -26,6 +28,7 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   late final TextEditingController usernameController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+  DatabaseService databaseService = DatabaseService();
   int _selectedRoleIndex = 1;
 
   Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
@@ -38,16 +41,18 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _openProfile(AccountEntity account) async {
-    await ProfileRoleStorage.saveRole(_selectedRole);
+    //await ProfileRoleStorage.saveRole(_selectedRole);
+    String _role = account.role == Role.coach ? "Coaches" : "Users";
+    //DataSnapshot? res = await databaseService.read(path: '$_role/${account.id}');
 
     if (!mounted) {
       return;
     }
 
-    if (_selectedRole == Role.coach) {
+    if (_role == "Coaches") {
       context.router.replace(CoachProfileRoute(account: account));
       return;
-    }
+    } else {}
 
     context.router.replace(UserProfileRoute(account: account));
   }

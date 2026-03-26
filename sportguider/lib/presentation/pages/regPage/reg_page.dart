@@ -41,10 +41,16 @@ class _RegPageState extends State<RegPage> {
   Future<void> _openProfile(AccountEntity account) async {
     //await ProfileRoleStorage.saveRole(_selectedRole);
     Map<String, dynamic> data = {
-      'email': 'example@mail.com',
+      'id': account.id,
+      'email': account.email,
+      'name': account.name,
+      'phoneNumber': account.phoneNumber,
       'role': _selectedRole == Role.coach ? "coach" : "user",
+      'favoriteSport': account.favoriteSport,
     };
-    databaseService.create(path: 'Users', data: data);
+    
+    String path = _selectedRole == Role.coach ? 'Coaches' : 'Users';
+    await databaseService.create(path: '$path/${account.id}', data: data);
 
     if (!mounted) {
       return;
