@@ -29,9 +29,9 @@ class _AuthPageState extends State<AuthPage> {
   late final TextEditingController usernameController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
   DatabaseService databaseService = DatabaseService();
-  int _selectedRoleIndex = 1;
+  // int _selectedRoleIndex = 1;
 
-  Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
+  // Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
 
   @override
   void dispose() {
@@ -42,14 +42,18 @@ class _AuthPageState extends State<AuthPage> {
 
   Future<void> _openProfile(AccountEntity account) async {
     //await ProfileRoleStorage.saveRole(_selectedRole);
-    String _role = account.role == Role.coach ? "Coaches" : "Users";
-    //DataSnapshot? res = await databaseService.read(path: '$_role/${account.id}');
+    DataSnapshot? resUs = await databaseService.read(
+      path: 'Users/${account.id}',
+    );
+    DataSnapshot? resCo = await databaseService.read(
+      path: 'Coaches/${account.id}',
+    );
 
     if (!mounted) {
       return;
     }
 
-    if (_role == "Coaches") {
+    if (resCo != null) {
       context.router.replace(CoachProfileRoute(account: account));
       return;
     } else {}
@@ -143,7 +147,7 @@ class _AuthPageState extends State<AuthPage> {
                         name: 'Иванов Иван',
                         email: 'example@mail.com',
                         phoneNumber: '+7900123123',
-                        role: _selectedRole,
+                        role: Role.admin,
                         favoriteSport: 'Баскетбол',
                         coaches: const ['Петров Петр Петрович'],
                       ),
@@ -160,7 +164,7 @@ class _AuthPageState extends State<AuthPage> {
                     await _openProfile(
                       AccountEntity.fromModel(
                         AccountModel.fromFirebaseUser(result.credential!.user),
-                      ).copyWith(role: _selectedRole),
+                      ),
                     );
                     return;
                   }
