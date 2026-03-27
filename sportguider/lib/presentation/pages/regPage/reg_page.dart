@@ -48,7 +48,7 @@ class _RegPageState extends State<RegPage> {
       'role': _selectedRole == Role.coach ? "coach" : "user",
       'favoriteSport': account.favoriteSport,
     };
-    
+
     String path = _selectedRole == Role.coach ? 'Coaches' : 'Users';
     await databaseService.create(path: '$path/${account.id}', data: data);
 
