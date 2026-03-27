@@ -120,7 +120,7 @@ class _MapPageState extends State<MapPage> {
     List<MapObject> mapObjects = [];
     final largeMapObject = ClusterizedPlacemarkCollection(
       mapId: largeMapObjectId,
-      radius: 110,
+      radius: 60,
       minZoom: 15,
       onClusterAdded:
           (ClusterizedPlacemarkCollection self, Cluster cluster) async {
@@ -230,8 +230,19 @@ class _MapPageState extends State<MapPage> {
                       return YandexMap(
                         key: mapKey,
                         mapObjects: _updateLocations(state.locations),
-                        onMapCreated: (controller) {
+                        onMapCreated: (controller) async {
                           mapController = controller;
+                          await controller.moveCamera(
+                            CameraUpdate.newCameraPosition(
+                              const CameraPosition(
+                                target: Point(
+                                  latitude: 47.2357,
+                                  longitude: 39.7015,
+                                ),
+                                zoom: 11,
+                              ),
+                            ),
+                          );
                         },
                         onUserLocationAdded: (UserLocationView view) async {
                           return view.copyWith(
