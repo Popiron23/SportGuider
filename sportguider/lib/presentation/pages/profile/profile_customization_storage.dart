@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sportguider/database_service.dart';
 
 class UserProfileCustomization {
   final String? displayName;
@@ -139,6 +140,12 @@ class ProfileCustomizationStorage {
   static Future<UserProfileCustomization> readUserCustomization(
     String accountId,
   ) async {
+    final snapshot = await DatabaseService().read(path: 'Users/$accountId');
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      return UserProfileCustomization.fromJson(data);
+    }
+
     final preferences = await SharedPreferences.getInstance();
     final rawJson = preferences.getString(_userProfileKey(accountId));
 
@@ -162,16 +169,27 @@ class ProfileCustomizationStorage {
     required String accountId,
     required UserProfileCustomization customization,
   }) async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(
-      _userProfileKey(accountId),
-      jsonEncode(customization.toJson()),
-    );
+    final data = Map<String, dynamic>.from(customization.toJson())
+      ..removeWhere((_, v) => v == null);
+
+    await Future.wait([
+      SharedPreferences.getInstance().then(
+        (p) => p.setString(_userProfileKey(accountId), jsonEncode(customization.toJson())),
+      ),
+      if (data.isNotEmpty)
+        DatabaseService().update(path: 'Users/$accountId', data: data),
+    ]);
   }
 
   static Future<CoachProfileCustomization> readCoachCustomization(
     String accountId,
   ) async {
+    final snapshot = await DatabaseService().read(path: 'Coaches/$accountId');
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      return CoachProfileCustomization.fromJson(data);
+    }
+
     final preferences = await SharedPreferences.getInstance();
     final rawJson = preferences.getString(_coachProfileKey(accountId));
 
@@ -195,10 +213,15 @@ class ProfileCustomizationStorage {
     required String accountId,
     required CoachProfileCustomization customization,
   }) async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(
-      _coachProfileKey(accountId),
-      jsonEncode(customization.toJson()),
-    );
+    final data = Map<String, dynamic>.from(customization.toJson())
+      ..removeWhere((_, v) => v == null);
+
+    await Future.wait([
+      SharedPreferences.getInstance().then(
+        (p) => p.setString(_coachProfileKey(accountId), jsonEncode(customization.toJson())),
+      ),
+      if (data.isNotEmpty)
+        DatabaseService().update(path: 'Coaches/$accountId', data: data),
+    ]);
   }
 }

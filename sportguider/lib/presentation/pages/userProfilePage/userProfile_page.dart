@@ -34,12 +34,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
   ];
 
   static const List<_AvatarOption> _avatarOptions = [
-    _AvatarOption(Icons.person_outline_rounded, Color(0xFFEAF3FF), Color(0xFF4B67F0)),
-    _AvatarOption(Icons.directions_run_rounded, Color(0xFFE9F7F1), Color(0xFF20A77B)),
-    _AvatarOption(Icons.sports_basketball_rounded, Color(0xFFFFF0E4), Color(0xFFFF9F45)),
-    _AvatarOption(Icons.sports_soccer_rounded, Color(0xFFEAF3FF), Color(0xFF2D7DFF)),
+    _AvatarOption(
+      Icons.person_outline_rounded,
+      Color(0xFFEAF3FF),
+      Color(0xFF4B67F0),
+    ),
+    _AvatarOption(
+      Icons.directions_run_rounded,
+      Color(0xFFE9F7F1),
+      Color(0xFF20A77B),
+    ),
+    _AvatarOption(
+      Icons.sports_basketball_rounded,
+      Color(0xFFFFF0E4),
+      Color(0xFFFF9F45),
+    ),
+    _AvatarOption(
+      Icons.sports_soccer_rounded,
+      Color(0xFFEAF3FF),
+      Color(0xFF2D7DFF),
+    ),
     _AvatarOption(Icons.pool_rounded, Color(0xFFE7F8FF), Color(0xFF21A7C9)),
-    _AvatarOption(Icons.fitness_center_rounded, Color(0xFFFFEEEC), Color(0xFFFF6E63)),
+    _AvatarOption(
+      Icons.fitness_center_rounded,
+      Color(0xFFFFEEEC),
+      Color(0xFFFF6E63),
+    ),
   ];
 
   late String _displayName;
@@ -67,9 +87,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> _loadCustomization() async {
-    final customization = await ProfileCustomizationStorage.readUserCustomization(
-      widget.account.id,
-    );
+    final customization =
+        await ProfileCustomizationStorage.readUserCustomization(
+          widget.account.id,
+        );
 
     if (!mounted) {
       return;
@@ -140,7 +161,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
         favoriteSport: favoriteSportText,
       ),
       roleLabel: 'ПРОФИЛЬ СПОРТСМЕНА',
-      headline: 'Личный кабинет для тренировок, маршрутов и общения с тренерами.',
+      headline:
+          'Личный кабинет для тренировок, маршрутов и общения с тренерами.',
       description: _displayValue(_shortDescription, _defaultDescription),
       editTitle: 'Редактирование профиля спортсмена',
       editButtonLabel: 'Редактировать профиль',
@@ -172,8 +194,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ProfileEditOption(
           icon: Icons.person_outline_rounded,
           title: 'Фото и имя',
-          subtitle:
-              'Обновить аватар, отображаемое имя и короткое описание.',
+          subtitle: 'Обновить аватар, отображаемое имя и короткое описание.',
           onTap: _openIdentityEditor,
         ),
         ProfileEditOption(
@@ -217,11 +238,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
               ),
               const SizedBox(height: 18),
-              ProfileInfoRow(
-                icon: Icons.badge_outlined,
-                label: 'ID профиля',
-                value: widget.account.id,
-              ),
             ],
           ),
         ),
@@ -261,10 +277,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     text: currentFocusText,
                     color: AppColors.successColor,
                   ),
-                  ProfileTag(
-                    text: 'Прогресс',
-                    color: AppColors.warningColor,
-                  ),
+                  ProfileTag(text: 'Прогресс', color: AppColors.warningColor),
                 ],
               ),
             ],
@@ -345,8 +358,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
         avatarOptions: _avatarOptions,
         initialAvatarIndex: _avatarIndex,
         initialDisplayName: _displayName,
-        initialShortDescription:
-            _shortDescription == _defaultDescription ? '' : _shortDescription,
+        initialShortDescription: _shortDescription == _defaultDescription
+            ? ''
+            : _shortDescription,
       ),
     );
 
@@ -404,9 +418,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     await _persistCustomization();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Контакты обновлены')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Контакты обновлены')));
     }
   }
 
@@ -428,14 +442,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     setState(() {
       _favoriteSport = result.favoriteSport.trim();
-      _trainingGoal = _displayValue(
-        result.trainingGoal,
-        _defaultTrainingGoal,
-      );
-      _currentFocus = _displayValue(
-        result.currentFocus,
-        _defaultCurrentFocus,
-      );
+      _trainingGoal = _displayValue(result.trainingGoal, _defaultTrainingGoal);
+      _currentFocus = _displayValue(result.currentFocus, _defaultCurrentFocus);
     });
 
     await _persistCustomization();
@@ -641,11 +649,7 @@ class _IdentityEditorSheetState extends State<_IdentityEditorSheet> {
                       width: 2,
                     ),
                   ),
-                  child: Icon(
-                    option.icon,
-                    size: 32,
-                    color: option.iconColor,
-                  ),
+                  child: Icon(option.icon, size: 32, color: option.iconColor),
                 ),
               );
             }),
@@ -663,8 +667,7 @@ class _IdentityEditorSheetState extends State<_IdentityEditorSheet> {
           const SizedBox(height: 10),
           _StableEditorField(
             controller: _shortDescriptionController,
-            hintText:
-                'Пара слов о себе, целях или любимом формате тренировок.',
+            hintText: 'Пара слов о себе, целях или любимом формате тренировок.',
             minLines: 3,
             maxLines: 4,
           ),
@@ -756,7 +759,9 @@ class _ContactsEditorSheetState extends State<_ContactsEditorSheet> {
                   (option) => ChoiceChip(
                     label: Text(option),
                     selected: _selectedContactMethod == option,
-                    selectedColor: AppColors.activeColor.withValues(alpha: 0.16),
+                    selectedColor: AppColors.activeColor.withValues(
+                      alpha: 0.16,
+                    ),
                     backgroundColor: AppColors.backgroundColor,
                     side: BorderSide(
                       color: _selectedContactMethod == option

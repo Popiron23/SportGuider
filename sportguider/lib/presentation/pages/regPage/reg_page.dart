@@ -39,7 +39,7 @@ class _RegPageState extends State<RegPage> {
   }
 
   Future<void> _openProfile(AccountEntity account) async {
-    //await ProfileRoleStorage.saveRole(_selectedRole);
+    await ProfileRoleStorage.saveRole(_selectedRole);
     Map<String, dynamic> data = {
       'id': account.id,
       'email': account.email,
