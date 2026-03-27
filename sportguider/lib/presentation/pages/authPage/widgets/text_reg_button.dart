@@ -18,7 +18,7 @@ class _TextRegButtonState extends State<TextRegButton> {
         Text(
           'Нет аккаунта?',
           style: TextStyle(color: AppColors.unactiveColor),
-        ), // Текст "Нет аккаунта?"
+        ),
         TextButton(
           onPressed: () {
             context.router.push(const RegRoute());
@@ -28,7 +28,7 @@ class _TextRegButtonState extends State<TextRegButton> {
               Set<WidgetState> states,
             ) {
               if (states.contains(WidgetState.pressed)) return Colors.black;
-              return AppColors.activeColor; // По умолчанию виджет.
+              return AppColors.activeColor;
             }),
           ),
           child: Text('Зарегистрироваться'),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "942708541670",
+    "project_id": "sportguider-60179",
+    "storage_bucket": "sportguider-60179.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942708541670:android:56c0ee713268be31a89327",
+        "android_client_info": {
+          "package_name": "com.example.sportguider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFoGT2JNfO3rkil5XW5ox6CqlZ54lQEw0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

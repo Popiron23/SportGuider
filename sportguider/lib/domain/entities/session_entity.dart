@@ -3,7 +3,7 @@ enum Roles { user, trainer }
 class SessionEntity {
   final int id;
   final Set<String>? AuthTokens; //токены авторизации
-  final DateTime? LastUsed; //время последнего активности
+  final DateTime? LastUsed; //время последней активности
   final Roles? role;
 
   SessionEntity({

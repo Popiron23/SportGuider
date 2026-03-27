@@ -10,10 +10,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i10;
-import 'package:collection/collection.dart' as _i13;
 import 'package:flutter/material.dart' as _i11;
-import 'package:sportguider/domain/entities/account_entity.dart' as _i14;
-import 'package:sportguider/domain/entities/location_entity.dart' as _i12;
+import 'package:sportguider/domain/entities/account_entity.dart' as _i12;
 import 'package:sportguider/presentation/pages/authPage/auth_page.dart' as _i1;
 import 'package:sportguider/presentation/pages/coachPage/coach_page.dart'
     as _i2;
@@ -62,18 +60,49 @@ class CoachRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.CoachProfilePage]
-class CoachProfileRoute extends _i10.PageRouteInfo<void> {
-  const CoachProfileRoute({List<_i10.PageRouteInfo>? children})
-    : super(CoachProfileRoute.name, initialChildren: children);
+class CoachProfileRoute extends _i10.PageRouteInfo<CoachProfileRouteArgs> {
+  CoachProfileRoute({
+    _i11.Key? key,
+    required _i12.AccountEntity account,
+    List<_i10.PageRouteInfo>? children,
+  }) : super(
+         CoachProfileRoute.name,
+         args: CoachProfileRouteArgs(key: key, account: account),
+         initialChildren: children,
+       );
 
   static const String name = 'CoachProfileRoute';
 
   static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      return const _i3.CoachProfilePage();
+      final args = data.argsAs<CoachProfileRouteArgs>();
+      return _i3.CoachProfilePage(key: args.key, account: args.account);
     },
   );
+}
+
+class CoachProfileRouteArgs {
+  const CoachProfileRouteArgs({this.key, required this.account});
+
+  final _i11.Key? key;
+
+  final _i12.AccountEntity account;
+
+  @override
+  String toString() {
+    return 'CoachProfileRouteArgs{key: $key, account: $account}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! CoachProfileRouteArgs) return false;
+    return key == other.key && account == other.account;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ account.hashCode;
 }
 
 /// generated route for
@@ -110,55 +139,18 @@ class HomeRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i6.MapPage]
-class MapRoute extends _i10.PageRouteInfo<MapRouteArgs> {
-  MapRoute({
-    _i11.Key? key,
-    required List<_i12.LocationEntity> locations,
-    List<_i10.PageRouteInfo>? children,
-  }) : super(
-         MapRoute.name,
-         args: MapRouteArgs(key: key, locations: locations),
-         initialChildren: children,
-       );
+class MapRoute extends _i10.PageRouteInfo<void> {
+  const MapRoute({List<_i10.PageRouteInfo>? children})
+    : super(MapRoute.name, initialChildren: children);
 
   static const String name = 'MapRoute';
 
   static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<MapRouteArgs>();
-      return _i6.MapPage(key: args.key, locations: args.locations);
+      return const _i6.MapPage();
     },
   );
-}
-
-class MapRouteArgs {
-  const MapRouteArgs({this.key, required this.locations});
-
-  final _i11.Key? key;
-
-  final List<_i12.LocationEntity> locations;
-
-  @override
-  String toString() {
-    return 'MapRouteArgs{key: $key, locations: $locations}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! MapRouteArgs) return false;
-    return key == other.key &&
-        const _i13.ListEquality<_i12.LocationEntity>().equals(
-          locations,
-          other.locations,
-        );
-  }
-
-  @override
-  int get hashCode =>
-      key.hashCode ^
-      const _i13.ListEquality<_i12.LocationEntity>().hash(locations);
 }
 
 /// generated route for
@@ -198,7 +190,7 @@ class RootRoute extends _i10.PageRouteInfo<void> {
 class UserProfileRoute extends _i10.PageRouteInfo<UserProfileRouteArgs> {
   UserProfileRoute({
     _i11.Key? key,
-    required _i14.AccountEntity account,
+    required _i12.AccountEntity account,
     List<_i10.PageRouteInfo>? children,
   }) : super(
          UserProfileRoute.name,
@@ -222,7 +214,7 @@ class UserProfileRouteArgs {
 
   final _i11.Key? key;
 
-  final _i14.AccountEntity account;
+  final _i12.AccountEntity account;
 
   @override
   String toString() {

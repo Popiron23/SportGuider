@@ -1,12 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:sportguider/domain/entities/account_entity.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/text_reg_button.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/username_input_field.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
-import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
-import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/role.dart';
+import 'package:sportguider/data/models/account_model.dart';
+import 'package:sportguider/database_service.dart';
+import 'package:sportguider/domain/entities/account_entity.dart';
+import 'package:sportguider/firebase_service.dart';
+import 'package:sportguider/presentation/colors.dart';
+import 'package:sportguider/presentation/pages/authPage/widgets/auth_button.dart';
+import 'package:sportguider/presentation/pages/authPage/widgets/password_input_field.dart';
+import 'package:sportguider/presentation/pages/profile/profile_role_storage.dart';
+import 'package:sportguider/presentation/pages/regPage/widgets/login_input_field.dart';
 import 'package:sportguider/presentation/widgets/back_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -20,16 +24,56 @@ class RegPage extends StatefulWidget {
 }
 
 class _RegPageState extends State<RegPage> {
-  late final TextEditingController usernameController = TextEditingController();
+  late final TextEditingController emailController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
+  DatabaseService databaseService = DatabaseService();
+  int _selectedRoleIndex = 1;
+
+  Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openProfile(AccountEntity account) async {
+    await ProfileRoleStorage.saveRole(_selectedRole);
+    Map<String, dynamic> data = {
+      'id': account.id,
+      'email': account.email,
+      'name': account.name,
+      'phoneNumber': account.phoneNumber,
+      'role': _selectedRole == Role.coach ? "coach" : "user",
+      'favoriteSport': account.favoriteSport,
+    };
+
+    String path = _selectedRole == Role.coach ? 'Coaches' : 'Users';
+    await databaseService.create(path: '$path/${account.id}', data: data);
+
+    if (!mounted) {
+      return;
+    }
+
+    if (_selectedRole == Role.coach) {
+      context.router.replaceAll([HomeRoute(), CoachProfileRoute(account: account)]);
+      return;
+    }
+
+    context.router.replaceAll([HomeRoute(), UserProfileRoute(account: account)]);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButtonReg(), backgroundColor: Colors.white),
+      appBar: AppBar(
+        leading: const BackButtonReg(),
+        backgroundColor: Colors.white,
+      ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.only(left: 60, right: 60),
+        padding: const EdgeInsets.symmetric(horizontal: 60),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -41,8 +85,7 @@ class _RegPageState extends State<RegPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Отступ между виджетом "Логин" и текстом "Регистрация"
-            SizedBox(height: 60),
+            const SizedBox(height: 60),
             Text(
               'Логин',
               style: GoogleFonts.philosopher(
@@ -51,14 +94,12 @@ class _RegPageState extends State<RegPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Виджет-логин
-            Container(
+            SizedBox(
               width: 320,
               height: 35,
-              child: UsernameInputField(controller: usernameController),
+              child: LoginInputField(controller: emailController),
             ),
-            //Отступ между виджетом "Пароль" и виджетом "Логин"
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Text(
               'Пароль',
               style: GoogleFonts.philosopher(
@@ -67,19 +108,15 @@ class _RegPageState extends State<RegPage> {
                 color: AppColors.activeColor,
               ),
             ),
-            //Виджет-пароль
-            Container(
+            SizedBox(
               width: 320,
               height: 35,
               child: PasswordInputField(controller: passwordController),
             ),
-
-            //Отступ между виджетом "Пароль" и виджетом "Зарегистрироваться"
-            SizedBox(height: 30),
-            // Here, default theme colors are used for activeBgColor, activeFgColor, inactiveBgColor and inactiveFgColor
+            const SizedBox(height: 30),
             ToggleSwitch(
               minWidth: 200,
-              initialLabelIndex: 0,
+              initialLabelIndex: _selectedRoleIndex,
               totalSwitches: 2,
               activeFgColor: Colors.white,
               inactiveBgColor: Colors.white,
@@ -88,35 +125,63 @@ class _RegPageState extends State<RegPage> {
                 AppColors.activeColor,
                 AppColors.activeColor,
               ],
-              labels: ['Тренер', 'Спортсмен'],
+              labels: const ['Тренер', 'Спортсмен'],
               onToggle: (index) {
-                print('switched to: $index');
+                setState(() {
+                  _selectedRoleIndex = index ?? 1;
+                });
               },
             ),
-            SizedBox(height: 30),
-            //Виджет-зарегистрироваться
-            Container(
+            const SizedBox(height: 30),
+            SizedBox(
               width: 320,
               height: 35,
               child: AuthButton(
                 title: 'Зарегистрироваться',
-                onPressed: () {
-                  final name = usernameController.text;
+                onPressed: () async {
+                  final email = emailController.text;
                   final password = passwordController.text;
-                  if (name == 'admin' && password == 'admin') {
-                    context.router.replace(
-                      UserProfileRoute(
-                        account: AccountEntity(
-                          id: 1,
-                          name: 'Иванов Иван',
-                          email: 'example@mail.com',
-                          phoneNumber: '+7900123123',
-                          favoriteSport: 'Баскетбол',
-                          coaches: ['Петров Петр Петрович'],
-                        ),
+                  String? errorMessage;
+
+                  if (email == 'admin' && password == 'admin') {
+                    await _openProfile(
+                      AccountEntity(
+                        id: '1',
+                        name: 'Иванов Иван',
+                        email: 'example@mail.com',
+                        phoneNumber: '+7900123123',
+                        role: _selectedRole,
+                        favoriteSport: 'Баскетбол',
+                        coaches: const ['Петров Петр Петрович'],
                       ),
                     );
+                    return;
                   }
+
+                  final result = await FirebaseService.onRegister(
+                    email: email,
+                    password: password,
+                  );
+
+                  if (result != null && result.isSuccess) {
+                    await _openProfile(
+                      AccountEntity.fromModel(
+                        AccountModel.fromFirebaseUser(result.credential!.user),
+                      ).copyWith(role: _selectedRole),
+                    );
+                    return;
+                  }
+
+                  errorMessage = result?.errorMes;
+                  if (!mounted) {
+                    return;
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(errorMessage ?? 'Ошибка регистрации'),
+                    ),
+                  );
                 },
               ),
             ),
