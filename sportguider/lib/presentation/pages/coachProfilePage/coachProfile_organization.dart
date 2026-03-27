@@ -357,8 +357,12 @@ class _CoachOrganizationDetails extends StatelessWidget {
 
 class _CoachOrganizationEmptyState extends StatelessWidget {
   final VoidCallback onSelect;
+  final bool isOwner;
 
-  const _CoachOrganizationEmptyState({required this.onSelect});
+  const _CoachOrganizationEmptyState({
+    required this.onSelect,
+    this.isOwner = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -409,29 +413,31 @@ class _CoachOrganizationEmptyState extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: onSelect,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.activeColor,
-              side: BorderSide(color: AppColors.activeColor),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+        if (isOwner) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onSelect,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.activeColor,
+                side: BorderSide(color: AppColors.activeColor),
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
               ),
-            ),
-            icon: const Icon(Icons.apartment_rounded),
-            label: Text(
-              'Выбрать организацию',
-              style: GoogleFonts.philosopher(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+              icon: const Icon(Icons.apartment_rounded),
+              label: Text(
+                'Выбрать организацию',
+                style: GoogleFonts.philosopher(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

@@ -47,7 +47,8 @@ class ProfileShell extends StatelessWidget {
   final List<ProfileEditOption> editOptions;
   final List<Widget> sections;
   final Widget? avatar;
-  final Future<void> Function(BuildContext context) onLogout;
+  final Future<void> Function(BuildContext context)? onLogout;
+  final bool isOwner;
 
   const ProfileShell({
     super.key,
@@ -64,7 +65,8 @@ class ProfileShell extends StatelessWidget {
     required this.editOptions,
     required this.sections,
     this.avatar,
-    required this.onLogout,
+    this.onLogout,
+    this.isOwner = true,
   });
 
   @override
@@ -88,6 +90,7 @@ class ProfileShell extends StatelessWidget {
                   accentColor: accentColor,
                   secondaryAccentColor: secondaryAccentColor,
                   avatar: avatar,
+                  isOwner: isOwner,
                   onEdit: () => _showEditSheet(context),
                 ),
               ),
@@ -108,29 +111,31 @@ class ProfileShell extends StatelessWidget {
                       if (index != sections.length - 1)
                         const SizedBox(height: 16),
                     ],
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () async => onLogout(context),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.dangerColor,
-                          side: BorderSide(color: AppColors.dangerColor),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                    if (isOwner) ...[
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async => onLogout?.call(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.dangerColor,
+                            side: BorderSide(color: AppColors.dangerColor),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                        ),
-                        icon: const Icon(Icons.logout_rounded),
-                        label: Text(
-                          'Выйти из аккаунта',
-                          style: GoogleFonts.philosopher(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                          icon: const Icon(Icons.logout_rounded),
+                          label: Text(
+                            'Выйти из аккаунта',
+                            style: GoogleFonts.philosopher(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -472,6 +477,7 @@ class _ProfileHeaderCard extends StatelessWidget {
   final Color accentColor;
   final Color secondaryAccentColor;
   final Widget? avatar;
+  final bool isOwner;
   final VoidCallback onEdit;
 
   const _ProfileHeaderCard({
@@ -484,6 +490,7 @@ class _ProfileHeaderCard extends StatelessWidget {
     required this.accentColor,
     required this.secondaryAccentColor,
     this.avatar,
+    this.isOwner = true,
     required this.onEdit,
   });
 
@@ -646,29 +653,31 @@ class _ProfileHeaderCard extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               ProfileTag(text: sportLabel, color: Colors.white),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onEdit,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: accentColor,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+              if (isOwner) ...[
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onEdit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: accentColor,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
                     ),
-                  ),
-                  icon: const Icon(Icons.edit_rounded),
-                  label: Text(
-                    editButtonLabel,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                    icon: const Icon(Icons.edit_rounded),
+                    label: Text(
+                      editButtonLabel,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ],

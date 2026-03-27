@@ -166,10 +166,12 @@ class _CoachCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
+        splashColor: Colors.white,
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
+
           child: Row(
             children: [
               // Аватарка-заглушка

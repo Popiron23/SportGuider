@@ -218,7 +218,11 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       achievements: achievements,
     );
 
+    final isOwner =
+        FirebaseService.auth.currentUser?.uid == widget.account.id;
+
     return ProfileShell(
+      isOwner: isOwner,
       account: widget.account.copyWith(
         name: _displayName,
         favoriteSport: specialization,
@@ -386,6 +390,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           child: _selectedOrganization == null
               ? _CoachOrganizationEmptyState(
                   onSelect: () => _openOrganizationEditor(context),
+                  isOwner: isOwner,
                 )
               : _CoachOrganizationDetails(
                   organization: _selectedOrganization!,
