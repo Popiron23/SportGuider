@@ -16,6 +16,7 @@ import 'package:sportguider/presentation/pages/mapPage/widgets/geolocation_butto
 import 'package:sportguider/presentation/pages/mapPage/widgets/modal_body_view.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/profile_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/search_button.dart';
+import 'package:sportguider/presentation/pages/mapPage/widgets/search_panel.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_minus_button.dart';
 import 'package:sportguider/presentation/pages/mapPage/widgets/zoom_plus_button.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -256,7 +257,7 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     FilterButton(),
                     const SizedBox(width: 10),
-                    SearchButton(),
+                    SearchButton(onPressed: () => _openSearchPanel(context)),
                   ],
                 ),
               ),
@@ -312,6 +313,30 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openSearchPanel(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => BlocProvider.value(
+        value: context.read<LocationsBloc>(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: SearchPanel(
+            mapController: mapController,
+            onPlaceSelected: (location) {
+              Navigator.pop(sheetContext);
+              _onPlacemarkTap(context, location);
+            },
           ),
         ),
       ),
