@@ -3,10 +3,12 @@ part of 'coachProfile_page.dart';
 class _CoachOrganizationPickerSheet extends StatelessWidget {
   final List<_CoachOrganization> organizations;
   final _CoachOrganization? selectedOrganization;
+  final String currentAccountId;
 
   const _CoachOrganizationPickerSheet({
     required this.organizations,
     required this.selectedOrganization,
+    required this.currentAccountId,
   });
 
   @override
@@ -67,6 +69,7 @@ class _CoachOrganizationPickerSheet extends StatelessWidget {
                       return _CoachOrganizationOptionTile(
                         organization: organization,
                         isSelected: isSelected,
+                        currentAccountId: currentAccountId,
                         onTap: () {
                           Navigator.of(context).pop(
                             _CoachOrganizationSelectionResult(
@@ -268,10 +271,12 @@ class _CoachSportDropdown extends StatelessWidget {
 class _CoachOrganizationDetails extends StatelessWidget {
   final _CoachOrganization organization;
   final Color accentColor;
+  final String currentAccountId;
 
   const _CoachOrganizationDetails({
     required this.organization,
     required this.accentColor,
+    this.currentAccountId = '',
   });
 
   @override
@@ -325,7 +330,7 @@ class _CoachOrganizationDetails extends StatelessWidget {
                           text: organization.sport,
                           color: accentColor,
                         ),
-                        if (organization.isCustom)
+                        if (organization.isCustom && organization.createdBy == currentAccountId)
                           const ProfileTag(
                             text: 'Своя точка',
                             color: Color(0xFF2F71F7),
@@ -446,11 +451,13 @@ class _CoachOrganizationEmptyState extends StatelessWidget {
 class _CoachOrganizationOptionTile extends StatelessWidget {
   final _CoachOrganization organization;
   final bool isSelected;
+  final String currentAccountId;
   final VoidCallback onTap;
 
   const _CoachOrganizationOptionTile({
     required this.organization,
     required this.isSelected,
+    this.currentAccountId = '',
     required this.onTap,
   });
 
@@ -512,7 +519,7 @@ class _CoachOrganizationOptionTile extends StatelessWidget {
                             text: organization.sport,
                             color: accentColor,
                           ),
-                          if (organization.isCustom)
+                          if (organization.isCustom && organization.createdBy == currentAccountId)
                             const ProfileTag(
                               text: 'Своя точка',
                               color: Color(0xFF2F71F7),

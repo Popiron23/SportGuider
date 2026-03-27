@@ -405,6 +405,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
               : _CoachOrganizationDetails(
                   organization: _selectedOrganization!,
                   accentColor: const Color(0xFF1D9A9D),
+                  currentAccountId: widget.account.id,
                 ),
         ),
       ],
@@ -546,6 +547,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           builder: (context) => _CoachOrganizationPickerSheet(
             organizations: _organizations,
             selectedOrganization: _selectedOrganization,
+            currentAccountId: widget.account.id,
           ),
         );
 
@@ -582,6 +584,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           _defaultOrganizationDescription,
         ),
         isCustom: true,
+        createdBy: widget.account.id,
         latitude: addedOrganization.latitude,
         longitude: addedOrganization.longitude,
       );

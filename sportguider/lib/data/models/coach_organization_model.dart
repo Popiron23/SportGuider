@@ -7,6 +7,7 @@ class CoachOrganizationModel {
   final String address;
   final String description;
   final bool isCustom;
+  final String createdBy;
   final double latitude;
   final double longitude;
 
@@ -19,6 +20,7 @@ class CoachOrganizationModel {
     required this.latitude,
     required this.longitude,
     this.isCustom = false,
+    this.createdBy = '',
   });
 
   factory CoachOrganizationModel.fromJson(Map<Object?, Object?> json) {
@@ -42,6 +44,7 @@ class CoachOrganizationModel {
       address: (json['address'] as String?) ?? '',
       description: (json['description'] as String?) ?? '',
       isCustom: (json['isCustom'] as bool?) ?? false,
+      createdBy: (json['createdBy'] as String?) ?? '',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
     );
@@ -55,6 +58,7 @@ class CoachOrganizationModel {
       'address': address,
       'description': description,
       'isCustom': isCustom,
+      'createdBy': createdBy,
       'latitude': latitude,
       'longitude': longitude,
     };

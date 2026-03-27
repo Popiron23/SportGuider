@@ -81,6 +81,7 @@ class _CoachOrganization {
   final String address;
   final String description;
   final bool isCustom;
+  final String createdBy;
 
   const _CoachOrganization({
     this.id = '',
@@ -89,6 +90,7 @@ class _CoachOrganization {
     required this.address,
     required this.description,
     this.isCustom = false,
+    this.createdBy = '',
   });
 
   factory _CoachOrganization.fromModel(CoachOrganizationModel model) {
@@ -99,6 +101,7 @@ class _CoachOrganization {
       address: model.address,
       description: model.description,
       isCustom: model.isCustom,
+      createdBy: model.createdBy,
     );
   }
 
