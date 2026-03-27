@@ -222,7 +222,11 @@ class _MapPageState extends State<MapPage> {
                 builder: (context, state) {
                   switch (state) {
                     case LocationsLoading():
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.activeColor,
+                        ),
+                      );
                     case LocationsSuccesState():
                       return YandexMap(
                         key: mapKey,

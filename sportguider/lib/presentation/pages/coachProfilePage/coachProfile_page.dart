@@ -91,6 +91,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   _CoachOrganization? _selectedOrganization;
   int _avatarIndex = 0;
   bool _isLoadingOrganizations = true;
+  bool _isLoading = true;
 
   final _organizationsRepo = CoachOrganizationsRepository();
 
@@ -198,11 +199,20 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           _selectedOrganization = _findOrganization(legacy) ?? legacy;
         }
       }
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.activeColor),
+        ),
+      );
+    }
     final specialization = _displayValue(
       _specialization,
       _specializationFallback(widget.account.favoriteSport),

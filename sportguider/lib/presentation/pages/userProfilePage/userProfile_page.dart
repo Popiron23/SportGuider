@@ -75,6 +75,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _trainingGoal;
   late String _currentFocus;
   int _avatarIndex = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -145,11 +146,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
           _defaultCurrentFocus,
         );
       }
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.activeColor),
+        ),
+      );
+    }
     final coaches = widget.account.coaches
         .where((coach) => coach.trim().isNotEmpty)
         .toList();
