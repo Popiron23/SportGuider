@@ -1,9 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/data/models/coach_organization_model.dart';
 import 'package:sportguider/data/repositories/coach_organizations_repository.dart';
+import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -87,11 +89,18 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   late String _workFormat;
   late String _workMode;
   late String _availability;
+  late String _contactPhone;
   List<_CoachOrganization> _organizations = [];
   _CoachOrganization? _selectedOrganization;
   int _avatarIndex = 0;
   bool _isLoadingOrganizations = true;
   bool _isLoading = true;
+  bool _isCoachAdded = false;
+  bool _isAddingCoach = false;
+  List<String> _currentUserCoaches = [];
+  bool _currentUserIsCoach = false;
+  bool _coachStatusLoaded = false;
+  List<_AthleteCardData> _athletesData = [];
 
   final _organizationsRepo = CoachOrganizationsRepository();
 
@@ -107,19 +116,73 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     _workFormat = _defaultWorkFormat;
     _workMode = _defaultWorkMode;
     _availability = _defaultAvailability;
+    _contactPhone = widget.account.phoneNumber?.trim() ?? '';
     _loadCustomization();
+    final currentUid = FirebaseService.auth.currentUser?.uid;
+    if (currentUid != null && currentUid != widget.account.id) {
+      _loadCoachStatus(currentUid);
+    }
+  }
+
+  Future<void> _loadCoachStatus(String currentUserId) async {
+    final results = await Future.wait([
+      ProfileCustomizationStorage.readUserCoaches(currentUserId),
+      ProfileRoleStorage.readRole(),
+    ]);
+    if (!mounted) return;
+    final coaches = results[0] as List<String>;
+    final role = results[1] as Role;
+    setState(() {
+      _currentUserCoaches = coaches;
+      _isCoachAdded = coaches.contains(widget.account.id);
+      _currentUserIsCoach = role == Role.coach;
+      _coachStatusLoaded = true;
+    });
+  }
+
+  Future<void> _toggleCoach() async {
+    final userId = FirebaseService.auth.currentUser?.uid;
+    if (userId == null) return;
+    setState(() => _isAddingCoach = true);
+    final updated = List<String>.from(_currentUserCoaches);
+    if (_isCoachAdded) {
+      updated.remove(widget.account.id);
+      await Future.wait([
+        ProfileCustomizationStorage.saveUserCoaches(userId, updated),
+        DatabaseService().delete(
+          path: 'CoachAthletes/${widget.account.id}/$userId',
+        ),
+      ]);
+    } else {
+      updated.add(widget.account.id);
+      await Future.wait([
+        ProfileCustomizationStorage.saveUserCoaches(userId, updated),
+        DatabaseService().update(
+          path: 'CoachAthletes/${widget.account.id}',
+          data: {userId: true},
+        ),
+      ]);
+    }
+    if (!mounted) return;
+    setState(() {
+      _currentUserCoaches = updated;
+      _isCoachAdded = !_isCoachAdded;
+      _isAddingCoach = false;
+    });
   }
 
   Future<void> _loadCustomization() async {
     final results = await Future.wait([
       ProfileCustomizationStorage.readCoachCustomization(widget.account.id),
       _organizationsRepo.getAll(),
+      ProfileCustomizationStorage.readCoachAthletes(widget.account.id),
     ]);
 
     if (!mounted) return;
 
     final customization = results[0] as CoachProfileCustomization;
     var organizationModels = results[1] as List<CoachOrganizationModel>;
+    final athleteIds = results[2] as List<String>;
 
     if (organizationModels.isEmpty) {
       organizationModels = await _organizationsRepo.seedPresets();
@@ -185,6 +248,9 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           _defaultAvailability,
         );
       }
+      if (customization.contactPhone != null) {
+        _contactPhone = customization.contactPhone!.trim();
+      }
 
       // Resolve selected org: first by ID (new), then by name/address (legacy)
       final savedId = customization.organizationId;
@@ -201,6 +267,22 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       }
       _isLoading = false;
     });
+
+    if (athleteIds.isNotEmpty) {
+      final athletes = await Future.wait(
+        athleteIds.map((id) async {
+          final c = await ProfileCustomizationStorage.readUserCustomization(id);
+          return _AthleteCardData(
+            id: id,
+            displayName: (c.displayName?.trim().isNotEmpty == true)
+                ? c.displayName!
+                : 'Спортсмен SportGuider',
+          );
+        }),
+      );
+      if (!mounted) return;
+      setState(() => _athletesData = athletes);
+    }
   }
 
   @override
@@ -296,6 +378,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         ),
       ],
       sections: [
+        if (!isOwner && _coachStatusLoaded && !_currentUserIsCoach)
+          _AddCoachButton(
+            isAdded: _isCoachAdded,
+            isLoading: _isAddingCoach,
+            onTap: _toggleCoach,
+          ),
         ProfileSectionCard(
           title: 'О тренере',
           subtitle:
@@ -319,6 +407,14 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
                 icon: Icons.groups_rounded,
                 label: 'Формат занятий',
                 value: workFormat,
+              ),
+              const SizedBox(height: 18),
+              ProfileInfoRow(
+                icon: Icons.phone_outlined,
+                label: 'Телефон',
+                value: _contactPhone.isNotEmpty
+                    ? _contactPhone
+                    : 'Телефон не указан',
               ),
               const SizedBox(height: 18),
               ProfileInfoRow(
@@ -408,6 +504,61 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
                   currentAccountId: widget.account.id,
                 ),
         ),
+        if (isOwner)
+          ProfileSectionCard(
+            title: 'Мои спортсмены',
+            subtitle: 'Спортсмены, которые добавили вас к себе в тренеры.',
+            child: _athletesData.isEmpty
+                ? const ProfileEmptyState(
+                    title: 'Пока никого нет',
+                    subtitle:
+                        'Когда спортсмен добавит вас в тренеры, он появится здесь.',
+                  )
+                : Column(
+                    children: _athletesData
+                        .map(
+                          (athlete) => Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE9F7F1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.directions_run_rounded,
+                                      color: Color(0xFF20A77B),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                      athlete.displayName,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
       ],
       onLogout: (context) async {
         await FirebaseService().logOut();
@@ -432,6 +583,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         initialDescription: _description == _defaultDescription
             ? ''
             : _description,
+        initialContactPhone: _contactPhone,
       ),
     );
 
@@ -449,6 +601,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       _avatarIndex = result.avatarIndex
           .clamp(0, _avatarOptions.length - 1)
           .toInt();
+      _contactPhone = result.contactPhone.trim();
     });
 
     await _persistCoachCustomization();
@@ -638,6 +791,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         workFormat: _workFormat.trim(),
         workMode: _workMode.trim(),
         availability: _availability.trim(),
+        contactPhone: _contactPhone.trim(),
         organizationId: _selectedOrganization?.id,
       ),
     );

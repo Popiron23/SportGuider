@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/data/repositories/locations_repository.dart';
 import 'locations_event.dart';
 import 'locations_state.dart';
@@ -10,7 +9,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   LocationsBloc({required LocationsRepository repository})
     : _repository = repository,
-      super(LocationsLoading(Sport.values)) {
+      super(LocationsLoading([])) {
     on<LocationsUpdateEvent>(_onUpdateEvent);
   }
 

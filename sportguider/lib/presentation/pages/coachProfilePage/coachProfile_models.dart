@@ -13,12 +13,14 @@ class _CoachShowcaseEditorResult {
   final String headline;
   final String description;
   final int avatarIndex;
+  final String contactPhone;
 
   const _CoachShowcaseEditorResult({
     required this.displayName,
     required this.headline,
     required this.description,
     required this.avatarIndex,
+    required this.contactPhone,
   });
 }
 
@@ -72,6 +74,13 @@ class _CoachOrganizationFormResult {
     required this.latitude,
     required this.longitude,
   });
+}
+
+class _AthleteCardData {
+  final String id;
+  final String displayName;
+
+  const _AthleteCardData({required this.id, required this.displayName});
 }
 
 class _CoachOrganization {

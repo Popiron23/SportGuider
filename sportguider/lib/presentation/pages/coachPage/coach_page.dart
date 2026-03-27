@@ -249,27 +249,7 @@ class _CoachCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.phone,
-                          size: 14,
-                          color: AppColors.textSecondaryColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            coach.phoneNumber ?? 'Не указан',
-                            style: GoogleFonts.roboto(
-                              fontSize: 12,
-                              color: AppColors.textSecondaryColor,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
+
                     Row(
                       children: [
                         Icon(

@@ -76,6 +76,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _currentFocus;
   int _avatarIndex = 0;
   bool _isLoading = true;
+  List<_CoachCardData> _coachesData = [];
 
   @override
   void initState() {
@@ -92,14 +93,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> _loadCustomization() async {
-    final customization =
-        await ProfileCustomizationStorage.readUserCustomization(
-          widget.account.id,
-        );
+    final results = await Future.wait([
+      ProfileCustomizationStorage.readUserCustomization(widget.account.id),
+      ProfileCustomizationStorage.readUserCoaches(widget.account.id),
+    ]);
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
+
+    final customization = results[0] as UserProfileCustomization;
+    final coachIds = results[1] as List<String>;
+
+    final coachDataList = await Future.wait(
+      coachIds.map((id) async {
+        final c = await ProfileCustomizationStorage.readCoachCustomization(id);
+        return _CoachCardData(
+          id: id,
+          displayName: (c.displayName?.trim().isNotEmpty == true)
+              ? c.displayName!
+              : 'Тренер SportGuider',
+          specialization: (c.specialization?.trim().isNotEmpty == true)
+              ? c.specialization!
+              : 'Тренер',
+        );
+      }),
+    );
+
+    if (!mounted) return;
 
     setState(() {
       if (customization.displayName != null) {
@@ -146,6 +165,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           _defaultCurrentFocus,
         );
       }
+      _coachesData = coachDataList;
       _isLoading = false;
     });
   }
@@ -160,9 +180,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ),
       );
     }
-    final coaches = widget.account.coaches
-        .where((coach) => coach.trim().isNotEmpty)
-        .toList();
     final favoriteSportText = _displayValue(
       _favoriteSport,
       'В поиске любимого спорта',
@@ -190,12 +207,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
           label: 'Любимый спорт',
           value: favoriteSportText,
           accentColor: AppColors.activeColor,
-        ),
-        ProfileMetric(
-          icon: Icons.groups_rounded,
-          label: 'Тренеров рядом',
-          value: coaches.length.toString().padLeft(2, '0'),
-          accentColor: AppColors.successColor,
         ),
         ProfileMetric(
           icon: Icons.track_changes_rounded,
@@ -301,50 +312,75 @@ class _UserProfilePageState extends State<UserProfilePage> {
           title: 'Мои тренеры',
           subtitle:
               'Здесь органично смотрится список специалистов, которых пользователь уже добавил или с кем занимается.',
-          child: coaches.isEmpty
+          child: _coachesData.isEmpty
               ? const ProfileEmptyState(
                   title: 'Пока пусто',
                   subtitle:
                       'Когда пользователь выберет тренера, его карточка или имя могут появляться прямо в этом блоке.',
                 )
               : Column(
-                  children: coaches
+                  children: _coachesData
                       .map(
                         (coach) => Padding(
                           padding: const EdgeInsets.only(bottom: 14),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.backgroundColor,
-                              borderRadius: BorderRadius.circular(20),
+                          child: GestureDetector(
+                            onTap: () => context.router.push(
+                              CoachProfileRoute(
+                                account: AccountEntity(id: coach.id),
+                              ),
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.softBlueColor,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Icon(
-                                    Icons.emoji_events_outlined,
-                                    color: AppColors.activeColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Text(
-                                    coach,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimaryColor,
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.softBlueColor,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      Icons.emoji_events_outlined,
+                                      color: AppColors.activeColor,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          coach.displayName,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textPrimaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          coach.specialization,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: AppColors.textSecondaryColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

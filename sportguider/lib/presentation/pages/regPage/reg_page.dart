@@ -57,11 +57,11 @@ class _RegPageState extends State<RegPage> {
     }
 
     if (_selectedRole == Role.coach) {
-      context.router.replace(CoachProfileRoute(account: account));
+      context.router.replaceAll([HomeRoute(), CoachProfileRoute(account: account)]);
       return;
     }
 
-    context.router.replace(UserProfileRoute(account: account));
+    context.router.replaceAll([HomeRoute(), UserProfileRoute(account: account)]);
   }
 
   @override

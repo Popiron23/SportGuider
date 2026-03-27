@@ -66,6 +66,7 @@ class CoachProfileCustomization {
   final String? workFormat;
   final String? workMode;
   final String? availability;
+  final String? contactPhone;
   final String? organizationId;
   final String? organizationName;
   final String? organizationSport;
@@ -83,6 +84,7 @@ class CoachProfileCustomization {
     this.workFormat,
     this.workMode,
     this.availability,
+    this.contactPhone,
     this.organizationId,
     this.organizationName,
     this.organizationSport,
@@ -102,6 +104,7 @@ class CoachProfileCustomization {
       'workFormat': workFormat,
       'workMode': workMode,
       'availability': availability,
+      'contactPhone': contactPhone,
       'organizationId': organizationId,
       'organizationName': organizationName,
       'organizationSport': organizationSport,
@@ -122,6 +125,7 @@ class CoachProfileCustomization {
       workFormat: json['workFormat'] as String?,
       workMode: json['workMode'] as String?,
       availability: json['availability'] as String?,
+      contactPhone: json['contactPhone'] as String?,
       organizationId: json['organizationId'] as String?,
       organizationName: json['organizationName'] as String?,
       organizationSport: json['organizationSport'] as String?,
@@ -223,5 +227,38 @@ class ProfileCustomizationStorage {
       if (data.isNotEmpty)
         DatabaseService().update(path: 'Coaches/$accountId', data: data),
     ]);
+  }
+
+  static Future<List<String>> readUserCoaches(String accountId) async {
+    final snapshot = await DatabaseService().read(path: 'Users/$accountId');
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      final raw = data['coaches'];
+      if (raw is List) {
+        return raw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+      }
+    }
+    return [];
+  }
+
+  static Future<void> saveUserCoaches(
+    String accountId,
+    List<String> coachIds,
+  ) async {
+    await DatabaseService().update(
+      path: 'Users/$accountId',
+      data: {'coaches': coachIds},
+    );
+  }
+
+  static Future<List<String>> readCoachAthletes(String coachId) async {
+    final snapshot = await DatabaseService().read(
+      path: 'CoachAthletes/$coachId',
+    );
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      return data.keys.where((k) => k.isNotEmpty).toList();
+    }
+    return [];
   }
 }
