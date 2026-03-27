@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/presentation/colors.dart';
+import 'package:sportguider/routes/router.gr.dart';
 
 class ProfileMetric {
   final IconData icon;
@@ -555,7 +556,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 children: [
                   _TopIconButton(
                     icon: Icons.arrow_back_ios_new_rounded,
-                    onPressed: () => context.router.back(),
+                    onPressed: () => context.router.popUntilRouteWithName(HomeRoute.name),
                   ),
                   const Spacer(),
                   Container(
