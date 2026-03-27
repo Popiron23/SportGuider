@@ -28,15 +28,15 @@ class AccountModel extends Equatable {
   factory AccountModel.fromFirebaseUser(User? firebaseUser) {
     return AccountModel(
       id: firebaseUser!.uid,
-      name: firebaseUser.displayName ?? 'null',
+      name: firebaseUser.displayName,
       email: firebaseUser.email,
-      phoneNumber: firebaseUser.phoneNumber ?? 'null',
+      phoneNumber: firebaseUser.phoneNumber,
       role: firebaseUser.isAnonymous
           ? Role.user
           : firebaseUser.email == 'admin@admin.com'
           ? Role.admin
           : Role.user,
-      favoriteSport: 'null',
+      favoriteSport: null,
       coaches: [''],
     );
   }
