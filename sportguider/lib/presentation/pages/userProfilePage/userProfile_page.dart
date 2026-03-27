@@ -209,12 +209,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
           accentColor: AppColors.activeColor,
         ),
         ProfileMetric(
-          icon: Icons.groups_rounded,
-          label: 'Тренеров рядом',
-          value: _coachesData.length.toString().padLeft(2, '0'),
-          accentColor: AppColors.successColor,
-        ),
-        ProfileMetric(
           icon: Icons.track_changes_rounded,
           label: 'Фокус',
           value: currentFocusText,
