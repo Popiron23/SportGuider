@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/data/models/account_model.dart';
+import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -26,9 +28,10 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   late final TextEditingController usernameController = TextEditingController();
   late final TextEditingController passwordController = TextEditingController();
-  int _selectedRoleIndex = 1;
+  DatabaseService databaseService = DatabaseService();
+  // int _selectedRoleIndex = 1;
 
-  Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
+  // Role get _selectedRole => _selectedRoleIndex == 0 ? Role.coach : Role.user;
 
   @override
   void dispose() {
@@ -38,16 +41,22 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _openProfile(AccountEntity account) async {
-    await ProfileRoleStorage.saveRole(_selectedRole);
+    //await ProfileRoleStorage.saveRole(_selectedRole);
+    DataSnapshot? resUs = await databaseService.read(
+      path: 'Users/${account.id}',
+    );
+    DataSnapshot? resCo = await databaseService.read(
+      path: 'Coaches/${account.id}',
+    );
 
     if (!mounted) {
       return;
     }
 
-    if (_selectedRole == Role.coach) {
+    if (resCo != null) {
       context.router.replace(CoachProfileRoute(account: account));
       return;
-    }
+    } else {}
 
     context.router.replace(UserProfileRoute(account: account));
   }
@@ -102,24 +111,24 @@ class _AuthPageState extends State<AuthPage> {
               child: PasswordInputField(controller: passwordController),
             ),
             const SizedBox(height: 30),
-            ToggleSwitch(
-              minWidth: 200,
-              initialLabelIndex: _selectedRoleIndex,
-              totalSwitches: 2,
-              activeFgColor: Colors.white,
-              inactiveBgColor: Colors.white,
-              activeBgColor: [
-                AppColors.activeColor,
-                AppColors.activeColor,
-                AppColors.activeColor,
-              ],
-              labels: const ['Тренер', 'Спортсмен'],
-              onToggle: (index) {
-                setState(() {
-                  _selectedRoleIndex = index ?? 1;
-                });
-              },
-            ),
+            // ToggleSwitch(
+            //   minWidth: 200,
+            //   initialLabelIndex: _selectedRoleIndex,
+            //   totalSwitches: 2,
+            //   activeFgColor: Colors.white,
+            //   inactiveBgColor: Colors.white,
+            //   activeBgColor: [
+            //     AppColors.activeColor,
+            //     AppColors.activeColor,
+            //     AppColors.activeColor,
+            //   ],
+            //   labels: const ['Тренер', 'Спортсмен'],
+            //   onToggle: (index) {
+            //     setState(() {
+            //       _selectedRoleIndex = index ?? 1;
+            //     });
+            //   },
+            // ),
             const SizedBox(height: 30),
             SizedBox(
               width: 320,
@@ -138,7 +147,7 @@ class _AuthPageState extends State<AuthPage> {
                         name: 'Иванов Иван',
                         email: 'example@mail.com',
                         phoneNumber: '+7900123123',
-                        role: _selectedRole,
+                        role: Role.admin,
                         favoriteSport: 'Баскетбол',
                         coaches: const ['Петров Петр Петрович'],
                       ),
@@ -155,7 +164,7 @@ class _AuthPageState extends State<AuthPage> {
                     await _openProfile(
                       AccountEntity.fromModel(
                         AccountModel.fromFirebaseUser(result.credential!.user),
-                      ).copyWith(role: _selectedRole),
+                      ),
                     );
                     return;
                   }
@@ -165,9 +174,9 @@ class _AuthPageState extends State<AuthPage> {
                     return;
                   }
 
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(errorMessage ?? 'Ошибка входа')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(errorMessage ?? 'Ошибка входа')),
+                  );
                 },
               ),
             ),
