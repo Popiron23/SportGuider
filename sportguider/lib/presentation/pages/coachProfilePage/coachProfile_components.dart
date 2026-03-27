@@ -240,3 +240,57 @@ class _CoachEditorField extends StatelessWidget {
     );
   }
 }
+
+class _AddCoachButton extends StatelessWidget {
+  final bool isAdded;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _AddCoachButton({
+    required this.isAdded,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isAdded ? AppColors.successColor : const Color(0xFF2F71F7);
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: isLoading ? null : onTap,
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          disabledBackgroundColor: color.withValues(alpha: 0.6),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        icon: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Icon(
+                isAdded
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.person_add_alt_1_rounded,
+                color: Colors.white,
+              ),
+        label: Text(
+          isAdded ? 'Тренер добавлен' : 'Добавить тренера',
+          style: GoogleFonts.philosopher(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}

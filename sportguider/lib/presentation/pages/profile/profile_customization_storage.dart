@@ -224,4 +224,26 @@ class ProfileCustomizationStorage {
         DatabaseService().update(path: 'Coaches/$accountId', data: data),
     ]);
   }
+
+  static Future<List<String>> readUserCoaches(String accountId) async {
+    final snapshot = await DatabaseService().read(path: 'Users/$accountId');
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      final raw = data['coaches'];
+      if (raw is List) {
+        return raw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+      }
+    }
+    return [];
+  }
+
+  static Future<void> saveUserCoaches(
+    String accountId,
+    List<String> coachIds,
+  ) async {
+    await DatabaseService().update(
+      path: 'Users/$accountId',
+      data: {'coaches': coachIds},
+    );
+  }
 }

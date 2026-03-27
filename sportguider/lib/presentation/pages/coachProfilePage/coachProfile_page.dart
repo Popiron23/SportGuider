@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/data/models/coach_organization_model.dart';
 import 'package:sportguider/data/repositories/coach_organizations_repository.dart';
@@ -92,6 +93,11 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   int _avatarIndex = 0;
   bool _isLoadingOrganizations = true;
   bool _isLoading = true;
+  bool _isCoachAdded = false;
+  bool _isAddingCoach = false;
+  List<String> _currentUserCoaches = [];
+  bool _currentUserIsCoach = false;
+  bool _coachStatusLoaded = false;
 
   final _organizationsRepo = CoachOrganizationsRepository();
 
@@ -108,6 +114,45 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     _workMode = _defaultWorkMode;
     _availability = _defaultAvailability;
     _loadCustomization();
+    final currentUid = FirebaseService.auth.currentUser?.uid;
+    if (currentUid != null && currentUid != widget.account.id) {
+      _loadCoachStatus(currentUid);
+    }
+  }
+
+  Future<void> _loadCoachStatus(String currentUserId) async {
+    final results = await Future.wait([
+      ProfileCustomizationStorage.readUserCoaches(currentUserId),
+      ProfileRoleStorage.readRole(),
+    ]);
+    if (!mounted) return;
+    final coaches = results[0] as List<String>;
+    final role = results[1] as Role;
+    setState(() {
+      _currentUserCoaches = coaches;
+      _isCoachAdded = coaches.contains(widget.account.id);
+      _currentUserIsCoach = role == Role.coach;
+      _coachStatusLoaded = true;
+    });
+  }
+
+  Future<void> _toggleCoach() async {
+    final userId = FirebaseService.auth.currentUser?.uid;
+    if (userId == null) return;
+    setState(() => _isAddingCoach = true);
+    final updated = List<String>.from(_currentUserCoaches);
+    if (_isCoachAdded) {
+      updated.remove(widget.account.id);
+    } else {
+      updated.add(widget.account.id);
+    }
+    await ProfileCustomizationStorage.saveUserCoaches(userId, updated);
+    if (!mounted) return;
+    setState(() {
+      _currentUserCoaches = updated;
+      _isCoachAdded = !_isCoachAdded;
+      _isAddingCoach = false;
+    });
   }
 
   Future<void> _loadCustomization() async {
@@ -296,6 +341,12 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         ),
       ],
       sections: [
+        if (!isOwner && _coachStatusLoaded && !_currentUserIsCoach)
+          _AddCoachButton(
+            isAdded: _isCoachAdded,
+            isLoading: _isAddingCoach,
+            onTap: _toggleCoach,
+          ),
         ProfileSectionCard(
           title: 'О тренере',
           subtitle:

@@ -43,3 +43,15 @@ class _SportsEditorResult {
     required this.currentFocus,
   });
 }
+
+class _CoachCardData {
+  final String id;
+  final String displayName;
+  final String specialization;
+
+  const _CoachCardData({
+    required this.id,
+    required this.displayName,
+    required this.specialization,
+  });
+}
