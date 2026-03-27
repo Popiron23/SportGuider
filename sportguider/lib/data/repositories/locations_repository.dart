@@ -21,7 +21,7 @@ class LocationsRepository {
               Map<Object?, Object?>.from(e as Map),
             ))
         .whereType<LocationEntity>()
-        .where((e) => sports.contains(e.sport))
+        .where((e) => sports.isEmpty || sports.contains(e.sport))
         .toList();
     return locations;
   }

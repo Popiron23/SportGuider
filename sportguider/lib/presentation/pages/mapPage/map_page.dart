@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/data/repositories/locations_repository.dart';
 import 'package:sportguider/domain/entities/location_entity.dart';
 import 'package:sportguider/presentation/bloc/locations_bloc.dart';
@@ -203,7 +202,7 @@ class _MapPageState extends State<MapPage> {
     return BlocProvider(
       create: (context) =>
           LocationsBloc(repository: LocationsRepository())
-            ..add(LocationsUpdateEvent(Sport.values)),
+            ..add(LocationsUpdateEvent([])),
       child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => Stack(
