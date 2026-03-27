@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:sportguider/core/enums/sport.dart';
+import 'package:sportguider/data/fixtures/rostov_on_don_places.dart';
 import 'package:sportguider/data/models/coach_organization_model.dart';
 
 class CoachOrganizationsRepository {
@@ -7,8 +8,9 @@ class CoachOrganizationsRepository {
     'places',
   );
 
-  static const _presets = [
-    (
+  static final List<CoachOrganizationModel> _localPresets = [
+    const CoachOrganizationModel(
+      id: 'preset_arena_north',
       name: 'Arena North',
       sport: Sport.football,
       address: 'Москва, Ленинградский проспект, 36',
@@ -17,7 +19,8 @@ class CoachOrganizationsRepository {
       latitude: 55.7964,
       longitude: 37.5340,
     ),
-    (
+    const CoachOrganizationModel(
+      id: 'preset_runlab_city',
       name: 'RunLab City',
       sport: Sport.football,
       address: 'Москва, Лужнецкая набережная, 24',
@@ -26,7 +29,8 @@ class CoachOrganizationsRepository {
       latitude: 55.7168,
       longitude: 37.5629,
     ),
-    (
+    const CoachOrganizationModel(
+      id: 'preset_balance_studio',
       name: 'Balance Studio',
       sport: Sport.tennis,
       address: 'Москва, улица Покровка, 17с1',
@@ -35,23 +39,40 @@ class CoachOrganizationsRepository {
       latitude: 55.7613,
       longitude: 37.6415,
     ),
+    ...rostovOnDonPlaceSeeds.map((seed) => seed.toCoachOrganizationModel()),
   ];
+
+  static String _comparisonKey(CoachOrganizationModel organization) =>
+      '${organization.name.trim().toLowerCase()}|${organization.address.trim().toLowerCase()}';
 
   Future<List<CoachOrganizationModel>> getAll() async {
     final snapshot = await _ref.get();
 
-    if (snapshot.value == null) {
-      return [];
-    }
-
-    final data = Map<Object?, Object?>.from(snapshot.value as Map);
-    return data.values
-        .map(
+    final remoteOrganizations = <CoachOrganizationModel>[];
+    if (snapshot.value != null) {
+      final data = Map<Object?, Object?>.from(snapshot.value as Map);
+      remoteOrganizations.addAll(
+        data.values.map(
           (e) => CoachOrganizationModel.fromJson(
             Map<Object?, Object?>.from(e as Map),
           ),
-        )
-        .toList();
+        ),
+      );
+    }
+
+    final mergedOrganizations = <String, CoachOrganizationModel>{
+      for (final organization in remoteOrganizations)
+        _comparisonKey(organization): organization,
+    };
+
+    for (final organization in _localPresets) {
+      mergedOrganizations.putIfAbsent(
+        _comparisonKey(organization),
+        () => organization,
+      );
+    }
+
+    return mergedOrganizations.values.toList();
   }
 
   Future<CoachOrganizationModel> add(CoachOrganizationModel organization) async {
@@ -72,7 +93,7 @@ class CoachOrganizationsRepository {
 
   Future<List<CoachOrganizationModel>> seedPresets() async {
     final results = <CoachOrganizationModel>[];
-    for (final preset in _presets) {
+    for (final preset in _localPresets) {
       final saved = await add(
         CoachOrganizationModel(
           id: '',
