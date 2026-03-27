@@ -178,9 +178,9 @@ class _MapPageState extends State<MapPage> {
               icon: PlacemarkIcon.single(
                 PlacemarkIconStyle(
                   image: BitmapDescriptor.fromAssetImage(
-                    'assets/images/png/placemark_icon.png',
+                    'assets/images/png/mark.png',
                   ),
-                  scale: 3.0,
+                  scale: 0.1,
                 ),
               ),
               opacity: 1.0,
