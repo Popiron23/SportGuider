@@ -5,6 +5,7 @@ import 'package:sportguider/core/enums/role.dart';
 import 'package:sportguider/core/enums/sport.dart';
 import 'package:sportguider/data/models/coach_organization_model.dart';
 import 'package:sportguider/data/repositories/coach_organizations_repository.dart';
+import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
@@ -98,6 +99,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   List<String> _currentUserCoaches = [];
   bool _currentUserIsCoach = false;
   bool _coachStatusLoaded = false;
+  List<_AthleteCardData> _athletesData = [];
 
   final _organizationsRepo = CoachOrganizationsRepository();
 
@@ -143,10 +145,22 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     final updated = List<String>.from(_currentUserCoaches);
     if (_isCoachAdded) {
       updated.remove(widget.account.id);
+      await Future.wait([
+        ProfileCustomizationStorage.saveUserCoaches(userId, updated),
+        DatabaseService().delete(
+          path: 'CoachAthletes/${widget.account.id}/$userId',
+        ),
+      ]);
     } else {
       updated.add(widget.account.id);
+      await Future.wait([
+        ProfileCustomizationStorage.saveUserCoaches(userId, updated),
+        DatabaseService().update(
+          path: 'CoachAthletes/${widget.account.id}',
+          data: {userId: true},
+        ),
+      ]);
     }
-    await ProfileCustomizationStorage.saveUserCoaches(userId, updated);
     if (!mounted) return;
     setState(() {
       _currentUserCoaches = updated;
@@ -159,12 +173,14 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     final results = await Future.wait([
       ProfileCustomizationStorage.readCoachCustomization(widget.account.id),
       _organizationsRepo.getAll(),
+      ProfileCustomizationStorage.readCoachAthletes(widget.account.id),
     ]);
 
     if (!mounted) return;
 
     final customization = results[0] as CoachProfileCustomization;
     var organizationModels = results[1] as List<CoachOrganizationModel>;
+    final athleteIds = results[2] as List<String>;
 
     if (organizationModels.isEmpty) {
       organizationModels = await _organizationsRepo.seedPresets();
@@ -246,6 +262,22 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       }
       _isLoading = false;
     });
+
+    if (athleteIds.isNotEmpty) {
+      final athletes = await Future.wait(
+        athleteIds.map((id) async {
+          final c = await ProfileCustomizationStorage.readUserCustomization(id);
+          return _AthleteCardData(
+            id: id,
+            displayName: (c.displayName?.trim().isNotEmpty == true)
+                ? c.displayName!
+                : 'Спортсмен SportGuider',
+          );
+        }),
+      );
+      if (!mounted) return;
+      setState(() => _athletesData = athletes);
+    }
   }
 
   @override
@@ -459,6 +491,61 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
                   currentAccountId: widget.account.id,
                 ),
         ),
+        if (isOwner)
+          ProfileSectionCard(
+            title: 'Мои спортсмены',
+            subtitle: 'Спортсмены, которые добавили вас к себе в тренеры.',
+            child: _athletesData.isEmpty
+                ? const ProfileEmptyState(
+                    title: 'Пока никого нет',
+                    subtitle:
+                        'Когда спортсмен добавит вас в тренеры, он появится здесь.',
+                  )
+                : Column(
+                    children: _athletesData
+                        .map(
+                          (athlete) => Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE9F7F1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.directions_run_rounded,
+                                      color: Color(0xFF20A77B),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                      athlete.displayName,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
       ],
       onLogout: (context) async {
         await FirebaseService().logOut();

@@ -74,6 +74,13 @@ class _CoachOrganizationFormResult {
   });
 }
 
+class _AthleteCardData {
+  final String id;
+  final String displayName;
+
+  const _AthleteCardData({required this.id, required this.displayName});
+}
+
 class _CoachOrganization {
   final String id;
   final String name;

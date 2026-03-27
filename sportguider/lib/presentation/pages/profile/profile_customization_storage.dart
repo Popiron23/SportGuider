@@ -246,4 +246,15 @@ class ProfileCustomizationStorage {
       data: {'coaches': coachIds},
     );
   }
+
+  static Future<List<String>> readCoachAthletes(String coachId) async {
+    final snapshot = await DatabaseService().read(
+      path: 'CoachAthletes/$coachId',
+    );
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      return data.keys.where((k) => k.isNotEmpty).toList();
+    }
+    return [];
+  }
 }
