@@ -41,10 +41,6 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _openProfile(AccountEntity account) async {
-    //await ProfileRoleStorage.saveRole(_selectedRole);
-    DataSnapshot? resUs = await databaseService.read(
-      path: 'Users/${account.id}',
-    );
     DataSnapshot? resCo = await databaseService.read(
       path: 'Coaches/${account.id}',
     );
@@ -54,10 +50,14 @@ class _AuthPageState extends State<AuthPage> {
     }
 
     if (resCo != null) {
+      await ProfileRoleStorage.saveRole(Role.coach);
+      if (!mounted) return;
       context.router.replace(CoachProfileRoute(account: account));
       return;
-    } else {}
+    }
 
+    await ProfileRoleStorage.saveRole(Role.user);
+    if (!mounted) return;
     context.router.replace(UserProfileRoute(account: account));
   }
 

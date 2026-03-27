@@ -43,14 +43,20 @@ class _CoachPageState extends State<CoachPage> {
           final data = child.value as Map<dynamic, dynamic>?;
           if (data != null) {
             Role role_ = data['role'] == 'coach' ? Role.coach : Role.user;
+            final displayName = data['displayName']?.toString();
+            final specialization = data['specialization']?.toString();
             coachesList.add(
               CoachEntity(
                 id: child.key ?? '',
-                name: data['name']?.toString() ?? 'Без имени',
+                name: (displayName != null && displayName.isNotEmpty)
+                    ? displayName
+                    : data['name']?.toString() ?? 'Без имени',
                 email: data['email']?.toString() ?? '',
                 phoneNumber: data['phoneNumber']?.toString() ?? '',
                 role: role_,
-                sport: data['favoriteSport']?.toString() ?? 'Не указан',
+                sport: (specialization != null && specialization.isNotEmpty)
+                    ? specialization
+                    : data['favoriteSport']?.toString() ?? 'Не указан',
                 description: data['description']?.toString(),
               ),
             );
@@ -164,12 +170,14 @@ class _CoachCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
+
           child: Row(
             children: [
               // Аватарка-заглушка
