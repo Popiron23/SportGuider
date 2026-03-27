@@ -9,6 +9,9 @@ import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/search_button.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/filter_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sportguider/presentation/colors.dart';
 
 @RoutePage()
 class CoachPage extends StatefulWidget {
@@ -114,6 +117,35 @@ class _CoachPageState extends State<CoachPage> {
                   CoachFilterButton(),
                   const SizedBox(width: 10),
                   SearchButton(),
+                ],
+              ),
+            ),
+
+            Positioned(
+              top: 5,
+              left: 10,
+              child: Row(
+                children: [
+                  FloatingActionButton(
+                    onPressed: () {
+                      // Действие при нажатии
+                      print('Кнопка нажата!');
+                      setState(() {
+                        _loadCoaches();
+                      });
+                    },
+                    backgroundColor: AppColors.activeColor,
+                    shape: CircleBorder(),
+                    child: SvgPicture.asset(
+                      'assets/images/svg/update.svg',
+                      colorFilter: ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+
+                  // const SizedBox(width: 10),
                 ],
               ),
             ),
