@@ -66,6 +66,7 @@ class CoachProfileCustomization {
   final String? workFormat;
   final String? workMode;
   final String? availability;
+  final String? contactPhone;
   final String? organizationId;
   final String? organizationName;
   final String? organizationSport;
@@ -83,6 +84,7 @@ class CoachProfileCustomization {
     this.workFormat,
     this.workMode,
     this.availability,
+    this.contactPhone,
     this.organizationId,
     this.organizationName,
     this.organizationSport,
@@ -102,6 +104,7 @@ class CoachProfileCustomization {
       'workFormat': workFormat,
       'workMode': workMode,
       'availability': availability,
+      'contactPhone': contactPhone,
       'organizationId': organizationId,
       'organizationName': organizationName,
       'organizationSport': organizationSport,
@@ -122,6 +125,7 @@ class CoachProfileCustomization {
       workFormat: json['workFormat'] as String?,
       workMode: json['workMode'] as String?,
       availability: json['availability'] as String?,
+      contactPhone: json['contactPhone'] as String?,
       organizationId: json['organizationId'] as String?,
       organizationName: json['organizationName'] as String?,
       organizationSport: json['organizationSport'] as String?,

@@ -89,6 +89,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
   late String _workFormat;
   late String _workMode;
   late String _availability;
+  late String _contactPhone;
   List<_CoachOrganization> _organizations = [];
   _CoachOrganization? _selectedOrganization;
   int _avatarIndex = 0;
@@ -115,6 +116,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
     _workFormat = _defaultWorkFormat;
     _workMode = _defaultWorkMode;
     _availability = _defaultAvailability;
+    _contactPhone = widget.account.phoneNumber?.trim() ?? '';
     _loadCustomization();
     final currentUid = FirebaseService.auth.currentUser?.uid;
     if (currentUid != null && currentUid != widget.account.id) {
@@ -245,6 +247,9 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
           customization.availability!,
           _defaultAvailability,
         );
+      }
+      if (customization.contactPhone != null) {
+        _contactPhone = customization.contactPhone!.trim();
       }
 
       // Resolve selected org: first by ID (new), then by name/address (legacy)
@@ -402,6 +407,14 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
                 icon: Icons.groups_rounded,
                 label: 'Формат занятий',
                 value: workFormat,
+              ),
+              const SizedBox(height: 18),
+              ProfileInfoRow(
+                icon: Icons.phone_outlined,
+                label: 'Телефон',
+                value: _contactPhone.isNotEmpty
+                    ? _contactPhone
+                    : 'Телефон не указан',
               ),
               const SizedBox(height: 18),
               ProfileInfoRow(
@@ -570,6 +583,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         initialDescription: _description == _defaultDescription
             ? ''
             : _description,
+        initialContactPhone: _contactPhone,
       ),
     );
 
@@ -587,6 +601,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
       _avatarIndex = result.avatarIndex
           .clamp(0, _avatarOptions.length - 1)
           .toInt();
+      _contactPhone = result.contactPhone.trim();
     });
 
     await _persistCoachCustomization();
@@ -776,6 +791,7 @@ class _CoachProfilePageState extends State<CoachProfilePage> {
         workFormat: _workFormat.trim(),
         workMode: _workMode.trim(),
         availability: _availability.trim(),
+        contactPhone: _contactPhone.trim(),
         organizationId: _selectedOrganization?.id,
       ),
     );

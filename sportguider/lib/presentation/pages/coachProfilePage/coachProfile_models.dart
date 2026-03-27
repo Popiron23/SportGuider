@@ -13,12 +13,14 @@ class _CoachShowcaseEditorResult {
   final String headline;
   final String description;
   final int avatarIndex;
+  final String contactPhone;
 
   const _CoachShowcaseEditorResult({
     required this.displayName,
     required this.headline,
     required this.description,
     required this.avatarIndex,
+    required this.contactPhone,
   });
 }
 

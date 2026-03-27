@@ -6,6 +6,7 @@ class _CoachShowcaseEditorSheet extends StatefulWidget {
   final String initialDisplayName;
   final String initialHeadline;
   final String initialDescription;
+  final String initialContactPhone;
 
   const _CoachShowcaseEditorSheet({
     required this.avatarOptions,
@@ -13,6 +14,7 @@ class _CoachShowcaseEditorSheet extends StatefulWidget {
     required this.initialDisplayName,
     required this.initialHeadline,
     required this.initialDescription,
+    required this.initialContactPhone,
   });
 
   @override
@@ -24,6 +26,7 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
   late final TextEditingController _displayNameController;
   late final TextEditingController _headlineController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _contactPhoneController;
   late int _selectedAvatarIndex;
 
   @override
@@ -36,6 +39,9 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
     _descriptionController = TextEditingController(
       text: widget.initialDescription,
     );
+    _contactPhoneController = TextEditingController(
+      text: widget.initialContactPhone,
+    );
     _selectedAvatarIndex = widget.initialAvatarIndex;
   }
 
@@ -44,6 +50,7 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
     _displayNameController.dispose();
     _headlineController.dispose();
     _descriptionController.dispose();
+    _contactPhoneController.dispose();
     super.dispose();
   }
 
@@ -61,6 +68,7 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
             headline: _headlineController.text,
             description: _descriptionController.text,
             avatarIndex: _selectedAvatarIndex,
+            contactPhone: _contactPhoneController.text,
           ),
         );
       },
@@ -127,6 +135,14 @@ class _CoachShowcaseEditorSheetState extends State<_CoachShowcaseEditorSheet> {
                 'Коротко опишите подход, стиль работы и ощущение от занятий с вами.',
             minLines: 3,
             maxLines: 4,
+          ),
+          const SizedBox(height: 20),
+          const _CoachEditorLabel(title: 'Телефон для связи'),
+          const SizedBox(height: 10),
+          _CoachEditorField(
+            controller: _contactPhoneController,
+            hintText: 'Например, +7 900 123 45 67',
+            keyboardType: TextInputType.phone,
           ),
         ],
       ),
