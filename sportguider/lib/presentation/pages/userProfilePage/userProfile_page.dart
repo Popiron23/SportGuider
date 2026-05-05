@@ -186,7 +186,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
     final currentFocusText = _displayValue(_currentFocus, _defaultCurrentFocus);
 
+    final isOwner =
+        widget.account.id == FirebaseService.auth.currentUser?.uid;
+
     return ProfileShell(
+      isOwner: isOwner,
       account: widget.account.copyWith(
         name: _displayName,
         favoriteSport: favoriteSportText,
