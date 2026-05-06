@@ -1,7 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:sportguider/presentation/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sportguider/core/enums/sport.dart';
+import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/search_button.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/filter_button.dart';
 
@@ -45,7 +46,10 @@ class _FriendPageState extends State<FriendPage> {
               right: 10,
               child: Row(
                 children: [
-                  CoachFilterButton(),
+                  CoachFilterButton(
+                    initialSportTypes: const <Sport>[],
+                    onApply: (_) {},
+                  ),
                   const SizedBox(width: 10),
                   SearchButton(),
                 ],
