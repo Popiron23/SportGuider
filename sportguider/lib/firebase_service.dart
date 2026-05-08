@@ -23,8 +23,20 @@ class FirebaseService {
     required String password,
   }) async {
     try {
+      final normalizedEmail = AuthResult.normalizeEmail(email);
+
+      final emailError = AuthResult.validateEmail(normalizedEmail);
+      if (emailError != null) {
+        return AuthResult.error(emailError);
+      }
+
+      final passwordError = AuthResult.validatePasswordForLogin(password);
+      if (passwordError != null) {
+        return AuthResult.error(passwordError);
+      }
+
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
+        email: normalizedEmail,
         password: password,
       );
       return AuthResult.succes(credential);
@@ -39,8 +51,22 @@ class FirebaseService {
     required String password,
   }) async {
     try {
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+      final normalizedEmail = AuthResult.normalizeEmail(email);
+
+      final emailError = AuthResult.validateEmail(normalizedEmail);
+      if (emailError != null) {
+        return AuthResult.error(emailError);
+      }
+
+      final passwordError = AuthResult.validatePassword(password);
+      if (passwordError != null) {
+        return AuthResult.error(passwordError);
+      }
+
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: normalizedEmail,
+        password: password,
+      );
       return AuthResult.succes(credential);
     } on FirebaseAuthException catch (e) {
       return AuthResult.fromException(e);
