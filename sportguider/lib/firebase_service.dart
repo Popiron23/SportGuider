@@ -23,8 +23,20 @@ class FirebaseService {
     required String password,
   }) async {
     try {
+      final normalizedEmail = AuthResult.normalizeEmail(email);
+
+      final emailError = AuthResult.validateEmail(normalizedEmail);
+      if (emailError != null) {
+        return AuthResult.error(emailError);
+      }
+
+      final passwordError = AuthResult.validatePasswordForLogin(password);
+      if (passwordError != null) {
+        return AuthResult.error(passwordError);
+      }
+
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
+        email: normalizedEmail,
         password: password,
       );
       return AuthResult.succes(credential);

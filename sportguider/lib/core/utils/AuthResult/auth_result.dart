@@ -112,6 +112,21 @@ class AuthResult {
     return null;
   }
 
+  /// Login should not reject passwords created under older rules.
+  /// Returns error message if password is clearly invalid, otherwise `null`.
+  static String? validatePasswordForLogin(String rawPassword) {
+    if (rawPassword.isEmpty) {
+      return 'Введите пароль';
+    }
+    if (rawPassword.contains(RegExp(r'\s'))) {
+      return 'Пароль не должен содержать пробелы';
+    }
+    if (rawPassword.length > 72) {
+      return 'Пароль слишком длинный';
+    }
+    return null;
+  }
+
   AuthResult.succes(this.credential) : errorMes = null {
     isSuccess = true;
   }
