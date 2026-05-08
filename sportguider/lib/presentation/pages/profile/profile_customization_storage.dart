@@ -261,4 +261,24 @@ class ProfileCustomizationStorage {
     }
     return [];
   }
+
+  static Future<List<String>> readUserFriends(String userId) async {
+    final snapshot = await DatabaseService().read(path: 'UserFriends/$userId');
+    if (snapshot != null && snapshot.value is Map) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      return data.keys.where((k) => k.isNotEmpty).toList();
+    }
+    return [];
+  }
+
+  static Future<void> addUserFriend(String userId, String friendId) async {
+    await DatabaseService().update(
+      path: 'UserFriends/$userId',
+      data: {friendId: true},
+    );
+  }
+
+  static Future<void> removeUserFriend(String userId, String friendId) async {
+    await DatabaseService().delete(path: 'UserFriends/$userId/$friendId');
+  }
 }
