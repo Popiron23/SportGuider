@@ -8,8 +8,6 @@ import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/coach_entity.dart';
 import 'package:sportguider/presentation/colors.dart';
 import 'package:sportguider/presentation/pages/coachPage/widgets/filter_button.dart';
-import 'package:sportguider/presentation/pages/coachPage/widgets/search_button.dart';
-import 'package:sportguider/presentation/pages/coachPage/widgets/search_panel.dart';
 import 'package:sportguider/routes/router.gr.dart';
 
 @RoutePage()
@@ -22,6 +20,7 @@ class CoachPage extends StatefulWidget {
 
 class _CoachPageState extends State<CoachPage> {
   final DatabaseService databaseService = DatabaseService();
+  final TextEditingController _searchController = TextEditingController();
 
   List<CoachEntity> _coaches = [];
   List<Sport> _selectedSports = [];
@@ -32,6 +31,12 @@ class _CoachPageState extends State<CoachPage> {
   void initState() {
     super.initState();
     _loadCoaches();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCoaches() async {
@@ -139,51 +144,6 @@ class _CoachPageState extends State<CoachPage> {
         .toList();
   }
 
-  void _openSearchPanel(BuildContext context) {
-    final filteredBySport = _coaches.where((coach) {
-      if (_selectedSports.isEmpty) {
-        return true;
-      }
-
-      final coachSport = _normalize(coach.sport);
-      return _selectedSports.any((sport) {
-        final keywords = <String>{
-          _normalize(sport.ru),
-          sport.name.toLowerCase(),
-          ...?_sportKeywords[sport],
-        };
-        return keywords.any(
-          (keyword) => keyword.isNotEmpty && coachSport.contains(keyword),
-        );
-      });
-    }).toList();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: CoachSearchPanel(
-          coaches: filteredBySport,
-          initialQuery: _searchQuery,
-          onQueryChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-            });
-          },
-          onCoachSelected: (coach) {
-            Navigator.pop(sheetContext);
-            _navigateToCoachProfile(coach);
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final visibleCoaches = _visibleCoaches;
@@ -194,7 +154,88 @@ class _CoachPageState extends State<CoachPage> {
           children: [
             Container(color: Colors.white),
             Positioned(
-              top: 50,
+              top: 5,
+              left: 10,
+              child: FloatingActionButton(
+                onPressed: _loadCoaches,
+                backgroundColor: AppColors.activeColor,
+                shape: const CircleBorder(),
+                child: SvgPicture.asset(
+                  'assets/images/svg/update.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 5,
+              right: 10,
+              child: CoachFilterButton(
+                initialSportTypes: _selectedSports,
+                onApply: (selectedSports) {
+                  setState(() {
+                    _selectedSports = selectedSports;
+                  });
+                },
+              ),
+            ),
+            Positioned(
+              top: 14,
+              left: 80,
+              right: 80,
+              child: SizedBox(
+                height: 44,
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                  style: GoogleFonts.philosopher(
+                    fontSize: 16,
+                    color: AppColors.textPrimaryColor,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Поиск тренера...',
+                    hintStyle: GoogleFonts.philosopher(
+                      fontSize: 16,
+                      color: AppColors.textSecondaryColor,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: AppColors.activeColor,
+                      size: 22,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.clear,
+                              color: AppColors.textSecondaryColor,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: AppColors.softBlueColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 70,
               left: 0,
               right: 0,
               child: Center(
@@ -209,47 +250,7 @@ class _CoachPageState extends State<CoachPage> {
               ),
             ),
             Positioned(
-              top: 5,
-              right: 10,
-              child: Row(
-                children: [
-                  CoachFilterButton(
-                    initialSportTypes: _selectedSports,
-                    onApply: (selectedSports) {
-                      setState(() {
-                        _selectedSports = selectedSports;
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  SearchButton(onPressed: () => _openSearchPanel(context)),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 5,
-              left: 10,
-              child: Row(
-                children: [
-                  FloatingActionButton(
-                    onPressed: () {
-                      _loadCoaches();
-                    },
-                    backgroundColor: AppColors.activeColor,
-                    shape: const CircleBorder(),
-                    child: SvgPicture.asset(
-                      'assets/images/svg/update.svg',
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 100,
+              top: 120,
               left: 0,
               right: 0,
               bottom: 0,
