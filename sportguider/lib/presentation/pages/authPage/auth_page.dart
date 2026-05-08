@@ -15,7 +15,6 @@ import 'package:sportguider/presentation/pages/authPage/widgets/username_input_f
 import 'package:sportguider/presentation/pages/profile/profile_role_storage.dart';
 import 'package:sportguider/presentation/widgets/back_button.dart';
 import 'package:sportguider/routes/router.gr.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 @RoutePage()
 class AuthPage extends StatefulWidget {
@@ -136,9 +135,8 @@ class _AuthPageState extends State<AuthPage> {
               child: AuthButton(
                 title: 'Войти',
                 onPressed: () async {
-                  final email = usernameController.text;
+                  final email = usernameController.text.trim();
                   final password = passwordController.text;
-                  String? errorMessage;
 
                   if (email == 'admin' && password == 'admin') {
                     await _openProfile(
@@ -169,13 +167,13 @@ class _AuthPageState extends State<AuthPage> {
                     return;
                   }
 
-                  errorMessage = result?.errorMes;
+                  final errorMessage = result?.errorMes ?? 'Не удалось выполнить вход. Попробуйте снова';
                   if (!mounted) {
                     return;
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(errorMessage ?? 'Ошибка входа')),
+                    SnackBar(content: Text(errorMessage)),
                   );
                 },
               ),
