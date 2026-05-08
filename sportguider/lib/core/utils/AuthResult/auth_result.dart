@@ -138,7 +138,44 @@ class AuthResult {
     isSuccess = false;
   }
 
-  factory AuthResult.fromException(FirebaseAuthException e) {
+  factory AuthResult.fromLoginException(FirebaseAuthException e) {
+    String message;
+
+    switch (e.code) {
+      case 'invalid-email':
+        message = 'Неверный формат email';
+        break;
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+        message = 'Неверный email или пароль';
+        break;
+      case 'user-disabled':
+        message = 'Этот аккаунт отключён';
+        break;
+      case 'too-many-requests':
+        message = 'Слишком много попыток входа. Попробуйте позже';
+        break;
+      case 'operation-not-allowed':
+        message = 'Вход по email и паролю отключён';
+        break;
+      case 'network-request-failed':
+        message = 'Проблема с сетью. Проверьте подключение';
+        break;
+      case 'requires-recent-login':
+        message = 'Требуется повторный вход в аккаунт';
+        break;
+      case 'internal-error':
+        message = 'Внутренняя ошибка сервера авторизации';
+        break;
+      default:
+        message = 'Не удалось выполнить вход. Проверьте данные и попробуйте снова';
+    }
+
+    return AuthResult.error(message);
+  }
+
+  factory AuthResult.fromRegisterException(FirebaseAuthException e) {
     String? message;
 
     switch (e.code) {
@@ -157,10 +194,20 @@ class AuthResult {
       case 'network-request-failed':
         message = 'Проблема с сетью. Проверьте подключение';
         break;
+      case 'too-many-requests':
+        message = 'Слишком много попыток. Попробуйте позже';
+        break;
+      case 'internal-error':
+        message = 'Внутренняя ошибка сервера авторизации';
+        break;
       default:
-        message = 'Ошибка регистрации: ${e.message}';
+        message = 'Не удалось выполнить регистрацию. Попробуйте снова';
     }
 
     return AuthResult.error(message);
+  }
+
+  factory AuthResult.fromException(FirebaseAuthException e) {
+    return AuthResult.fromRegisterException(e);
   }
 }

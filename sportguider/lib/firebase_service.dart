@@ -41,7 +41,9 @@ class FirebaseService {
       );
       return AuthResult.succes(credential);
     } on FirebaseAuthException catch (e) {
-      return AuthResult.fromException(e);
+      return AuthResult.fromLoginException(e);
+    } catch (_) {
+      return AuthResult.error('Не удалось выполнить вход. Попробуйте снова');
     }
   }
 
@@ -69,7 +71,9 @@ class FirebaseService {
       );
       return AuthResult.succes(credential);
     } on FirebaseAuthException catch (e) {
-      return AuthResult.fromException(e);
+      return AuthResult.fromRegisterException(e);
+    } catch (_) {
+      return AuthResult.error('Не удалось выполнить регистрацию. Попробуйте снова');
     }
   }
 
