@@ -70,6 +70,9 @@ class AuthResult {
       if (label.isEmpty || label.length > 63) {
         return 'Неверный формат email';
       }
+      if (label.startsWith('-') || label.endsWith('-')) {
+        return 'Неверный формат email';
+      }
     }
 
     return null;
