@@ -9,8 +9,6 @@ import 'package:sportguider/database_service.dart';
 import 'package:sportguider/domain/entities/account_entity.dart';
 import 'package:sportguider/firebase_service.dart';
 import 'package:sportguider/presentation/colors.dart';
-import 'package:sportguider/presentation/pages/coachPage/widgets/filter_button.dart';
-import 'package:sportguider/presentation/pages/coachPage/widgets/search_button.dart';
 import 'package:sportguider/presentation/pages/profile/profile_customization_storage.dart';
 import 'package:sportguider/routes/router.gr.dart';
 
@@ -24,8 +22,10 @@ class FriendPage extends StatefulWidget {
 
 class _FriendPageState extends State<FriendPage> {
   final DatabaseService _db = DatabaseService();
+  final TextEditingController _searchController = TextEditingController();
   StreamSubscription<User?>? _authSub;
   String _currentUserId = '';
+  String _searchQuery = '';
 
   bool _isLoading = true;
   bool _showAllUsers = false;
@@ -48,9 +48,38 @@ class _FriendPageState extends State<FriendPage> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _authSub?.cancel();
     super.dispose();
   }
+
+  List<_FriendCardData> get _visibleFriends {
+    if (_searchQuery.trim().isEmpty) return _friends;
+    return _friends
+        .where((u) => _matchesNamePrefix(u.displayName, _searchQuery))
+        .toList();
+  }
+
+  List<_FriendCardData> get _visibleAllUsers {
+    if (_searchQuery.trim().isEmpty) return _allUsers;
+    return _allUsers
+        .where((u) => _matchesNamePrefix(u.displayName, _searchQuery))
+        .toList();
+  }
+
+  String _normalize(String value) => value.trim().toLowerCase();
+
+  bool _matchesNamePrefix(String value, String query) {
+    final q = _normalize(query);
+    if (q.isEmpty) return true;
+    return _splitNameParts(value).any((part) => part.startsWith(q));
+  }
+
+  List<String> _splitNameParts(String value) =>
+      _normalize(value)
+          .split(RegExp(r'[\s\-]+'))
+          .where((p) => p.isNotEmpty)
+          .toList();
 
   Future<void> _loadFriends() async {
     if (_currentUserId.isEmpty) {
@@ -156,7 +185,13 @@ class _FriendPageState extends State<FriendPage> {
     return Scaffold(
       floatingActionButton: !_showAllUsers
           ? FloatingActionButton(
-              onPressed: () => setState(() => _showAllUsers = true),
+              onPressed: () {
+                _searchController.clear();
+                setState(() {
+                  _showAllUsers = true;
+                  _searchQuery = '';
+                });
+              },
               backgroundColor: AppColors.successColor,
               shape: const CircleBorder(),
               child: const Icon(Icons.person_add, color: Colors.white),
@@ -167,8 +202,93 @@ class _FriendPageState extends State<FriendPage> {
           children: [
             Container(color: Colors.white),
 
+            if (_showAllUsers)
+              Positioned(
+                top: 14,
+                left: 80,
+                right: 80,
+                child: SizedBox(
+                  height: 44,
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    style: GoogleFonts.philosopher(
+                      fontSize: 16,
+                      color: AppColors.textPrimaryColor,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Поиск пользователя...',
+                      hintStyle: GoogleFonts.philosopher(
+                        fontSize: 16,
+                        color: AppColors.textSecondaryColor,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.activeColor,
+                        size: 22,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: AppColors.textSecondaryColor,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: AppColors.softBlueColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+              ),
+
             Positioned(
-              top: 50,
+              top: 5,
+              left: 10,
+              child: FloatingActionButton(
+                onPressed: _loadFriends,
+                backgroundColor: AppColors.activeColor,
+                shape: const CircleBorder(),
+                child: SvgPicture.asset(
+                  'assets/images/svg/update.svg',
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+
+            if (_showAllUsers)
+              Positioned(
+                top: 5,
+                right: 10,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _showAllUsers = false;
+                      _searchQuery = '';
+                    });
+                  },
+                  backgroundColor: AppColors.textSecondaryColor,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+              ),
+
+            Positioned(
+              top: 65,
               left: 0,
               right: 0,
               child: Center(
@@ -184,37 +304,7 @@ class _FriendPageState extends State<FriendPage> {
             ),
 
             Positioned(
-              top: 5,
-              left: 10,
-              child: Row(
-                children: [
-                  FloatingActionButton(
-                    onPressed: _loadFriends,
-                    backgroundColor: AppColors.activeColor,
-                    shape: const CircleBorder(),
-                    child: SvgPicture.asset(
-                      'assets/images/svg/update.svg',
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  if (_showAllUsers) ...[
-                    const SizedBox(width: 10),
-                    FloatingActionButton(
-                      onPressed: () => setState(() => _showAllUsers = false),
-                      backgroundColor: AppColors.textSecondaryColor,
-                      shape: const CircleBorder(),
-                      child: const Icon(Icons.arrow_back, color: Colors.white),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            Positioned(
-              top: 100,
+              top: 115,
               left: 0,
               right: 0,
               bottom: 0,
@@ -232,21 +322,21 @@ class _FriendPageState extends State<FriendPage> {
     }
 
     if (!_showAllUsers) {
-      if (_friends.isEmpty) return _buildEmptyFriends();
+      if (_visibleFriends.isEmpty) return _buildEmptyFriends();
       return ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _friends.length,
+        itemCount: _visibleFriends.length,
         itemBuilder: (_, i) => _FriendCard(
-          user: _friends[i],
-          showToggle: false,
+          user: _visibleFriends[i],
+          showToggle: true,
           isFriend: true,
-          onTap: () => _navigateToUserProfile(_friends[i]),
-          onToggleFriend: () => _removeFriend(_friends[i].id),
+          onTap: () => _navigateToUserProfile(_visibleFriends[i]),
+          onToggleFriend: () => _removeFriend(_visibleFriends[i].id),
         ),
       );
     }
 
-    if (_allUsers.isEmpty) {
+    if (_visibleAllUsers.isEmpty) {
       return Center(
         child: Text(
           'Пользователи не найдены',
@@ -260,17 +350,17 @@ class _FriendPageState extends State<FriendPage> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _allUsers.length,
+      itemCount: _visibleAllUsers.length,
       itemBuilder: (_, i) {
-        final isFriend = _friendIds.contains(_allUsers[i].id);
+        final isFriend = _friendIds.contains(_visibleAllUsers[i].id);
         return _FriendCard(
-          user: _allUsers[i],
+          user: _visibleAllUsers[i],
           showToggle: true,
           isFriend: isFriend,
-          onTap: () => _navigateToUserProfile(_allUsers[i]),
+          onTap: () => _navigateToUserProfile(_visibleAllUsers[i]),
           onToggleFriend: () => isFriend
-              ? _removeFriend(_allUsers[i].id)
-              : _addFriend(_allUsers[i].id),
+              ? _removeFriend(_visibleAllUsers[i].id)
+              : _addFriend(_visibleAllUsers[i].id),
         );
       },
     );
@@ -307,7 +397,13 @@ class _FriendPageState extends State<FriendPage> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => setState(() => _showAllUsers = true),
+              onPressed: () {
+                _searchController.clear();
+                setState(() {
+                  _showAllUsers = true;
+                  _searchQuery = '';
+                });
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.activeColor,
                 foregroundColor: Colors.white,
